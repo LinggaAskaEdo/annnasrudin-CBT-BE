@@ -1,0 +1,48 @@
+{
+  "name": "vibe-engineering",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/annasnurdin/vibe-engineering.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/annasnurdin/vibe-engineering/issues"
+  },
+  "homepage": "https://github.com/annasnurdin/vibe-engineering#readme",
+  "dependencies": {
+    "@prisma/client": "^7.6.0",
+    "bcryptjs": "^3.0.3",
+    "express": "^5.2.1",
+    "joi": "^18.1.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "uuid": "^13.0.0",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "babel-jest": "^30.3.0",
+    "dotenv": "^17.4.0",
+    "jest": "^30.3.0",
+    "nodemon": "^3.1.14",
+    "prisma": "^7.6.0",
+    "supertest": "^7.2.2"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}
