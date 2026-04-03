@@ -10,6 +10,8 @@ import examRoutes from './routes/examRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,6 +20,10 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+// Swagger API Documentation
+const swaggerDocument = YAML.load(path.join(process.cwd(), 'docs', 'swagger.yaml'));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Basic Request Logger
 app.use((req, res, next) => {
