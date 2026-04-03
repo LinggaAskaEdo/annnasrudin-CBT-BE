@@ -47,3 +47,28 @@ export const login = async (req, res, next) => {
     });
   }
 };
+
+/**
+ * Logout handler
+ */
+export const logout = async (req, res, next) => {
+  try {
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { currentSessionId: null }
+    });
+
+    winston.info(`User ${req.user.username} logged out successfully.`);
+
+    res.json({
+      status: 'success',
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    winston.error(`Logout failed: ${error.message}`);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+};

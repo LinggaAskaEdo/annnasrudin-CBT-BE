@@ -55,3 +55,60 @@ export const getMySchedules = async (req, res, next) => {
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
+
+/**
+ * Guru updates an Exam Schedule.
+ */
+export const updateSchedule = async (req, res, next) => {
+  const { id } = req.params;
+  const { startTime, endTime, deadline, rombelId } = req.body;
+
+  try {
+    const existing = await prisma.jadwalUjian.findUnique({ 
+        where: { id },
+        include: { paketUjian: true }
+    });
+
+    if (!existing || existing.paketUjian.guruId !== req.user.id) {
+        return res.status(403).json({ status: 'error', message: 'Forbidden' });
+    }
+
+    const updated = await prisma.jadwalUjian.update({
+      where: { id },
+      data: {
+        startTime: startTime ? new Date(startTime) : undefined,
+        endTime: endTime ? new Date(endTime) : undefined,
+        deadline: deadline ? new Date(deadline) : undefined,
+        rombelId
+      }
+    });
+
+    res.json({ status: 'success', data: updated });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+/**
+ * Guru deletes an Exam Schedule.
+ */
+export const deleteSchedule = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const existing = await prisma.jadwalUjian.findUnique({ 
+        where: { id },
+        include: { paketUjian: true }
+    });
+
+    if (!existing || existing.paketUjian.guruId !== req.user.id) {
+        return res.status(403).json({ status: 'error', message: 'Forbidden' });
+    }
+
+    await prisma.jadwalUjian.delete({ where: { id } });
+
+    res.json({ status: 'success', message: 'Schedule deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};

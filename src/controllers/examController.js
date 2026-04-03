@@ -113,3 +113,102 @@ export const getMyPackages = async (req, res, next) => {
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
+
+/**
+ * Guru updates an Exam Package title or subject.
+ */
+export const updateExamPackage = async (req, res, next) => {
+  const { id } = req.params;
+  const { title, mapelId } = req.body;
+
+  try {
+    const existing = await prisma.paketUjian.findUnique({ where: { id } });
+    if (!existing || existing.guruId !== req.user.id) {
+        return res.status(403).json({ status: 'error', message: 'Forbidden' });
+    }
+
+    const updated = await prisma.paketUjian.update({
+      where: { id },
+      data: { title, mapelId }
+    });
+
+    res.json({ status: 'success', data: updated });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+/**
+ * Guru deletes an Exam Package and its questions.
+ */
+export const deleteExamPackage = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const existing = await prisma.paketUjian.findUnique({ where: { id } });
+    if (!existing || existing.guruId !== req.user.id) {
+        return res.status(403).json({ status: 'error', message: 'Forbidden' });
+    }
+
+    // Prisma handles cascading deletes if configured in schema, 
+    // but here we manually delete Soals first to be safe if not.
+    await prisma.soal.deleteMany({ where: { paketUjianId: id } });
+    await prisma.paketUjian.delete({ where: { id } });
+
+    res.json({ status: 'success', message: 'Exam package and its questions deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+/**
+ * Guru updates an individual Question.
+ */
+export const updateQuestion = async (req, res, next) => {
+  const { id } = req.params;
+  const { questionType, questionText, options, correctAnswer } = req.body;
+
+  try {
+    const existing = await prisma.soal.findUnique({ 
+        where: { id },
+        include: { paketUjian: true }
+    });
+
+    if (!existing || existing.paketUjian.guruId !== req.user.id) {
+        return res.status(403).json({ status: 'error', message: 'Forbidden' });
+    }
+
+    const updated = await prisma.soal.update({
+      where: { id },
+      data: { questionType, questionText, options, correctAnswer }
+    });
+
+    res.json({ status: 'success', data: updated });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+/**
+ * Guru deletes an individual Question.
+ */
+export const deleteQuestion = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const existing = await prisma.soal.findUnique({ 
+        where: { id },
+        include: { paketUjian: true }
+    });
+
+    if (!existing || existing.paketUjian.guruId !== req.user.id) {
+        return res.status(403).json({ status: 'error', message: 'Forbidden' });
+    }
+
+    await prisma.soal.delete({ where: { id } });
+
+    res.json({ status: 'success', message: 'Question deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};

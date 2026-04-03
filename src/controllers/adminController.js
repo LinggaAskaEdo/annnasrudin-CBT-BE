@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 const createUserSchema = Joi.object({
   username: Joi.string().required(),
   name: Joi.string().required(),
-  role: Joi.string().valid('GURU', 'SISWA').required(),
+  role: Joi.string().valid('ADMIN', 'GURU', 'SISWA').required(),
   jabatan: Joi.string().allow('', null).optional(),
   rombelId: Joi.string().uuid().allow(null).optional()
 });
@@ -113,6 +113,62 @@ export const getAllUsers = async (req, res, next) => {
     });
   } catch (error) {
     winston.error(`Fetching users failed: ${error.message}`);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+};
+
+/**
+ * Admin updates their own profile.
+ */
+export const updateAdminProfile = async (req, res, next) => {
+  const schema = Joi.object({
+    password: Joi.string().min(6).optional(),
+    name: Joi.string().optional()
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      status: 'error',
+      message: error.details[0].message
+    });
+  }
+
+  const { password, name } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const updateData = {};
+    if (password) updateData.password = await hashPassword(password);
+    if (name) updateData.name = name;
+
+    if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ status: 'error', message: 'No data provided to update' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        role: true,
+        createdAt: true
+      }
+    });
+
+    winston.info(`Admin ${updatedUser.username} updated their profile`);
+
+    res.json({
+      status: 'success',
+      data: updatedUser
+    });
+  } catch (error) {
+    winston.error(`Admin profile update failed: ${error.message}`);
     res.status(500).json({
       status: 'error',
       message: error.message

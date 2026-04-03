@@ -5,91 +5,102 @@ Sistem CBT SD adalah backend application berbasis Node.js yang ditujukan untuk m
 ## 🚀 Fitur Utama
 
 - **Role-Based Access Control (RBAC):** Autentikasi aman menggunakan JWT dengan batasan akses penuh per-role.
-- **Sistem Keamanan Sesi Ganda:** Mencegah satu user (terutama Siswa) untuk login di banyak perangkat secara serentak (Single-device session).
-- **Manajemen Materi & Ujian (Guru):** Guru dapat mengunggah file Modul (PDF), membuat Bank Soal, dan menyusun Paket Ujian pilihan ganda & Uraian.
-- **CBT Engine Berwaktu (Siswa):** Halaman ujian interaktif yang membaca waktu mulai dan kadaluwarsa pengerjaan, lengkap dengan fitur auto-grading untuk soal pilihan ganda.
-- **Penilaian Manual & Feedback:** Guru dapat membaca jawaban Uraian berbentuk teks dari murid, serta memberikan nilai langsung dan umpan balik yang dapat dibaca oleh Siswa.
-- **Laporan Otomatis:** Output JSON format untuk rekapitulasi poin kelas keseluruhan.
-- **Rotasi Log Otomatis:** Sistem logging menyeluruh per aksi user menggunakan standar industri `winston`.
-- **API Documentation Terintegrasi:** Spesifikasi lengkap menggunakan Swagger API documentation (OpenAPI 3.0).
+- **Sistem Keamanan Sesi Ganda:** Mencegah satu user untuk login di banyak perangkat secara serentak. Jika login di perangkat baru, sesi lama akan otomatis keluar dengan pesan: `"Sedang login di perangkat lain"`.
+- **Penilaian Manual & Skor Independen:** Guru dapat menilai soal Uraian secara manual. Skor Pilihan Ganda (`scorePilgan`) dan Uraian (`scoreUraian`) dicatat secara terpisah sesuai jenis ujiannya.
+- **Laporan Otomatis:** Output JSON format untuk rekapitulasi nilai kelas keseluruhan.
+- **API Documentation Terintegrasi:** Spesifikasi lengkap menggunakan Swagger UI.
 
 ---
 
 ## 🛠️ Stack Teknologi Terapan
-- **Runtime Environment:** Node.js versi LTS (`ES Modules`)
-- **Web Framework:** Express.js 5.x
-- **Database & ORM:** MySQL & Prisma ORM 
-- **Autentikasi:** JSON Web Token (JWT) + Bcrypt
-- **Logger:** Winston Dailly Rotate File
-- **Dokumentasi API:** Swagger UI Express & YAML
-
----
-
-## 💻 Persyaratan Infrastruktur (Prerequisites)
-Pastikan hal berikut sudah terinstall di perangkat pengembangan / server:
-- Node.js LTS (v16, v18, v20, dst).
-- Database MySQL Client.
+- **Runtime:** Node.js LTS (ES Modules)
+- **Framework:** Express.js 5.x
+- **ORM:** Prisma v6
+- **Database:** MySQL
+- **Auth:** JWT + Bcrypt
+- **Documentation:** Swagger / OpenAPI 3.0
 
 ---
 
 ## ⚙️ Petunjuk Pemasangan (Setup Guide)
 
-1. **Clone repositori**
+1. **Clone & Install**
    ```bash
-   git clone <url-repo-anda>
-   cd vibe-engineering
-   ```
-
-2. **Install dependensi**
-   ```bash
+   git clone <repo-url>
    npm install
    ```
 
-3. **Inisialisasi Variabel Lingkungan (.env)**
-   Sesuaikan URL akses ke Database MySQL, ubah username dan password root sesuai spesifikasi server Anda.
+2. **Environment (.env)**
    ```env
-   DATABASE_URL="mysql://root:password_anda@localhost:3306/cbt_sd_db"
+   DATABASE_URL="mysql://root:pass@localhost:3306/cbt_db"
    PORT=3000
-   NODE_ENV=development
-   JWT_SECRET=super_secret_session_key
+   JWT_SECRET="your_secret"
    ```
 
-4. **Sinkronisasi Skema Database**
-   Perintah ini akan membaca `schema.prisma` dan menyusun tabel yang dibutuhkan ke Database Anda.
+3. **Database Sync**
    ```bash
    npx prisma db push
-   ```
-   *(Penting: Saat inisialisasi awal pada device baru, biasakan juga menjalankan `npx prisma generate`)*
-
-5. **Jalankan Seeder (Akun Bawaan)**
-   Akan menumbuhkan sebuah akun **Admin** default dengan kata sandi bawaan, yang tugasnya bertugas mendistribusikan akun guru dan murid.
-   ```bash
+   npx prisma generate
    npm run seed
    ```
 
-6. **Jalankan Aplikasi**
-   Untuk Server Production:
-   ```bash
-   npm start
-   ```
-   Untuk Mode Development (Live Reload):
+4. **Run**
    ```bash
    npm run dev
    ```
 
 ---
 
-## 📖 Dokumentasi Endpoint API (Swagger)
+## 📖 Dokumentasi API
 
-Aplikasi ini dilengkapi Dokumentasi Swagger bawaan interaktif. Saat API berjalan Anda bisa melihat cara pakai seluruh endpoint beserta tipe Request JSON lewat:
+Seluruh request yang membutuhkan autentikasi harus menyertakan Header:
+`Authorization: Bearer <token>`
 
-**Endpoint Akses:** `http://localhost:3000/api-docs`
+### 🔐 Autentikasi
+| Method | Endpoint | Role | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| POST | `/api/auth/login` | Publik | Login & mendapatkan Token |
+| POST | `/api/auth/logout` | All | Logout & hapus sesi aktif |
+
+### 👨‍💼 Admin (Manajemen User)
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| PATCH | `/api/admin/profile` | Update nama/password Admin sendiri |
+| POST | `/api/admin/users` | Buat User baru (**ADMIN**, **GURU**, **SISWA**) |
+| GET | `/api/admin/users` | List semua user |
+
+### 👨‍🏫 Guru (Materi & Ujian)
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| POST/PUT/DELETE | `/api/modules/` | Kelola Modul PDF (Upload ke `/uploads`) |
+| POST/PUT/DELETE | `/api/exams/packages` | Kelola Paket Ujian |
+| POST/PUT/DELETE | `/api/exams/questions` | Kelola Bank Soal |
+| POST/PUT/DELETE | `/api/exams/schedule` | Kelola Jadwal Ujian Rombel |
+| GET | `/api/teacher/students` | Lihat daftar siswa per Rombel |
+| PATCH | `/api/teacher/submissions/:id/grade` | Berikan nilai & feedback Uraian |
+
+### 👶 Siswa (Pengerjaan Ujian)
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| GET | `/api/student/modules` | Lihat modul yang tersedia untuk Rombelnya |
+| GET | `/api/student/exams` | Lihat jadwal ujian aktif/mendatang |
+| POST | `/api/student/exams/:id/start` | Mulai sesi ujian (mendapat soal) |
+| POST | `/api/student/exams/:id/submit` | Kirim jawaban ujian (Auto-grading Pilgan) |
+| GET | `/api/student/results` | Lihat riwayat dan detail nilai |
+
+### 📊 Laporan
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| GET | `/api/reports/classroom/:scheduleId` | Download rekapitulasi nilai satu kelas (JSON) |
 
 ---
 
 ## 👥 Alur Penggunaan (User Workflow) Dasar
 
-1. **Admin Utama** masuk ke sistem (`username: admin`, `password: admin123`), lalu menggunakan Token JWT tersebut untuk Mendaftarkan akun **Guru** dan **Siswa** sembari mendistribusikan _Password Default Auto-Generate_.
-2. **Guru** masuk, mengganti password, kemudian membuat **Modul PDF**, **Soal-soal**, dan menjadwalkan **Paket Ujian** ke Suatu Kelas / Rombel.
-3. **Siswa** masuk, menekan **Mulai Ujian (CBT)**, dan Mengerjakan Ujian sampai Selesai.
-4. Terakhir, **Guru** memeriksa Uraian, lalu mengunduh **Classroom Report**.
+1. **Admin** mendaftarkan Guru & Siswa, serta memberikan _Password Default_.
+2. **Guru** login, mengunggah materi belajar, menyusun soal, dan menentukan jadwal ujian.
+3. **Siswa** mengerjakan ujian sesuai jadwal. Sistem otomatis mengoreksi Pilihan Ganda.
+4. **Guru** masuk ke menu grading untuk mengoreksi Soal Uraian secara manual.
+5. **Skor Independen**: Nilai Pilihan Ganda dan Nilai Uraian tersimpan secara terpisah dan dapat dipantau oleh Siswa maupun Guru/Admin via Laporan.
+
+**Swagger Docs:** `http://localhost:3000/api-docs`

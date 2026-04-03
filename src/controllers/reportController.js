@@ -26,24 +26,15 @@ export const getClassroomReport = async (req, res, next) => {
     if (!schedule) return res.status(404).json({ status: 'error', message: 'Schedule not found' });
 
     /**
-     * NOTE FOR FUTURE DEVELOPMENT (Weighting System):
-     * The report currently displays the auto-graded score.
-     * Future reporting should include the aggregated (Pilgan + Weighted Uraian) total score.
+     * The report displays independent scores for Pilihan Ganda and Uraian.
      */
 
     const processedResults = schedule.hasilUjians.map(h => {
-        let uraianPoints = 0;
-        if (Array.isArray(h.answers)) {
-            h.answers.forEach(ans => {
-                if (ans.type === 'URAIAN') uraianPoints += (ans.teacherScore || 0);
-            });
-        }
-
         return {
             studentName: h.siswa.name,
             username: h.siswa.username,
-            autoScore: h.score,
-            uraianTotalPoints: uraianPoints,
+            scorePilgan: h.scorePilgan,
+            scoreUraian: h.scoreUraian,
             status: h.status,
             submittedAt: h.updatedAt
         };

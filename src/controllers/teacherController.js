@@ -157,27 +157,24 @@ export const gradeUraian = async (req, res, next) => {
         return ans;
     });
 
-    // Final Score Calculation: Independent sum of Pilgan (already in score) and manual Uraian
-    // For now, we update the existing score with the additional points or maintain independent stats.
     /**
-     * NOTE FOR FUTURE DEVELOPMENT (Weighting System):
-     * Currently, the total score is simply an aggregate of correct Pilgan.
-     * In future iterations, implement a weighted average: (pilganScore * 0.6) + (uraianScore * 0.4).
+     * Final Score Calculation: Simple sum of manual Uraian points into scoreUraian.
      */
-    let totalManualScore = 0;
-    uraianGrades.forEach(g => { totalManualScore += (g.teacherScore || 0); });
+    let totalUraianScore = 0;
+    updatedAnswers.forEach(ans => {
+        if (ans.type === 'URAIAN') totalUraianScore += (ans.teacherScore || 0);
+    });
 
     // Update the record
     const updated = await prisma.hasilUjian.update({
         where: { id: hasilUjianId },
         data: {
             answers: updatedAnswers,
-            // score can be updated here to reflect the new total if needed, or keep it as is.
-            // For this project, we'll keep the auto-graded score and let Guru append the Uraian points.
+            scoreUraian: totalUraianScore
         }
     });
 
-    winston.info(`Guru ${req.user.username} graded submission: ${hasilUjianId}. Total Manual Score added: ${totalManualScore}`);
+    winston.info(`Guru ${req.user.username} graded submission: ${hasilUjianId}. Uraian Score: ${totalUraianScore}`);
 
     res.json({
         status: 'success',

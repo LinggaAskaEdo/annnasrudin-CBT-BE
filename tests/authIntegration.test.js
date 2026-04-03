@@ -1,10 +1,15 @@
-import request from 'supertest';
-import app from '../src/app.js';
-import * as authService from '../src/services/authService.js';
 import { jest } from '@jest/globals';
 
-// Mock authService
-jest.mock('../src/services/authService.js');
+// Mocking authService BEFORE anything else
+// Note: We need to use default export because that's how it's imported in controllers sometimes, 
+// but here it's usually named exports.
+jest.unstable_mockModule('../src/services/authService.js', () => ({
+  loginUser: jest.fn(),
+}));
+
+const { default: app } = await import('../src/app.js');
+const { default: request } = await import('supertest');
+const authService = await import('../src/services/authService.js');
 
 describe('Auth Controller Integration', () => {
   test('POST /api/auth/login should return 200 and token on success', async () => {

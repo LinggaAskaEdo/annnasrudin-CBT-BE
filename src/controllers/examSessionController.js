@@ -25,6 +25,16 @@ export const startExam = async (req, res, next) => {
     }
 
     const now = new Date();
+    
+    // Lazy Force-Submit: If deadline passed but session is still ONGOING
+    if (schedule.hasilUjians.length > 0 && schedule.hasilUjians[0].status === 'ONGOING' && now > schedule.deadline) {
+        await prisma.hasilUjian.update({
+            where: { id: schedule.hasilUjians[0].id },
+            data: { status: 'COMPLETED' }
+        });
+        return res.status(400).json({ status: 'error', message: 'Exam period has ended' });
+    }
+
     if (now < schedule.startTime || now > schedule.deadline) {
       return res.status(400).json({ status: 'error', message: 'Exam not available at this time' });
     }
@@ -97,14 +107,27 @@ export const submitExam = async (req, res, next) => {
         return { ...ans, type: question.questionType };
     });
 
-    // Normalize score to 100
-    const totalPilgan = questions.filter(q => q.questionType === 'PILGAN').length;
-    const finalScore = totalPilgan > 0 ? (score / totalPilgan) * 100 : 0;
+    // Simple Score: Sum of correct Pilihan Ganda answers (No Weighting)
+    const finalScore = score;
+
+    const now = new Date();
+    if (now > schedule.deadline) {
+        // Auto-submit as is if past deadline, but inform user
+        await prisma.hasilUjian.update({
+            where: { id: session.id },
+            data: {
+                scorePilgan: finalScore,
+                answers: gradedAnswers,
+                status: 'COMPLETED'
+            }
+        });
+        return res.status(400).json({ status: 'error', message: 'Submitted after deadline. Score saved but marked.' });
+    }
 
     await prisma.hasilUjian.update({
         where: { id: session.id },
         data: {
-            score: finalScore,
+            scorePilgan: finalScore,
             answers: gradedAnswers,
             status: 'COMPLETED'
         }
@@ -115,7 +138,7 @@ export const submitExam = async (req, res, next) => {
     res.json({
         status: 'success',
         message: 'Exam submitted successfully',
-        score: finalScore
+        scorePilgan: finalScore
     });
   } catch (error) {
     winston.error(`Submitting exam failed: ${error.message}`);
