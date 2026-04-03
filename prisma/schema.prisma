@@ -171,4 +171,7 @@ model HasilUjian {
   // Part of a specific schedule
   jadwalUjianId String
   jadwalUjian   JadwalUjian @relation(fields: [jadwalUjianId], references: [id])
+
+  @@index([siswaId])
+  @@index([jadwalUjianId])
 }

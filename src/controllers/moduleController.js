@@ -84,3 +84,35 @@ export const getMyModules = async (req, res, next) => {
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
+
+/**
+ * Guru deletes a module and its physical file.
+ */
+export const deleteModule = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const existingModule = await prisma.modul.findUnique({ where: { id } });
+    if (!existingModule || existingModule.guruId !== req.user.id) {
+      return res.status(403).json({ status: 'error', message: 'Forbidden' });
+    }
+
+    // Delete from DB first
+    await prisma.modul.delete({ where: { id } });
+
+    // Cleanup the physical file
+    if (fs.existsSync(existingModule.filePath)) {
+        fs.unlinkSync(existingModule.filePath);
+    }
+
+    winston.info(`Module ${existingModule.title} deleted by Guru ${req.user.username}`);
+
+    res.json({
+      status: 'success',
+      message: 'Module deleted successfully'
+    });
+  } catch (error) {
+    winston.error(`Module deletion failed: ${error.message}`);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};

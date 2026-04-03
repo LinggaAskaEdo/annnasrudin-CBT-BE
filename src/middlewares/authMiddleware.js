@@ -34,7 +34,7 @@ export const authenticate = async (req, res, next) => {
     if (!user || user.currentSessionId !== decoded.sessionId) {
         return res.status(401).json({
             status: 'error',
-            message: 'Unauthorized: Session invalidated by a more recent login'
+            message: 'Sedang login di perangkat lain'
         });
     }
 

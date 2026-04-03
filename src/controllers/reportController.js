@@ -32,18 +32,10 @@ export const getClassroomReport = async (req, res, next) => {
      */
 
     const processedResults = schedule.hasilUjians.map(h => {
-        let uraianPoints = 0;
-        if (Array.isArray(h.answers)) {
-            h.answers.forEach(ans => {
-                if (ans.type === 'URAIAN') uraianPoints += (ans.teacherScore || 0);
-            });
-        }
-
         return {
             studentName: h.siswa.name,
             username: h.siswa.username,
-            autoScore: h.score,
-            uraianTotalPoints: uraianPoints,
+            finalScore: h.score, // Now reflects Pilgan + Uraian
             status: h.status,
             submittedAt: h.updatedAt
         };

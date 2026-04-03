@@ -10,6 +10,7 @@ router.use(isGuru);
 
 router.post('/', upload.single('pdf'), createModule);
 router.put('/:id', upload.single('pdf'), updateModule);
+router.delete('/:id', deleteModule);
 router.get('/my', getMyModules);
 
 export default router;
