@@ -156,13 +156,15 @@ model JadwalUjian {
 }
 
 model HasilUjian {
-  id        String     @id @default(uuid())
-  score     Float      @default(0)
-  answers   Json       // Student's answers
-  status    ExamStatus @default(ONGOING)
-  startTime DateTime   @default(now())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id          String     @id @default(uuid())
+  score       Float      @default(0) // Deprecated total score
+  scorePilgan Float      @default(0)
+  scoreUraian Float      @default(0)
+  answers     Json       // Student's answers
+  status      ExamStatus @default(ONGOING)
+  startTime   DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   // Student who took the exam
   siswaId String

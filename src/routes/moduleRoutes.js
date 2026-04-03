@@ -1,5 +1,5 @@
 import express from 'express';
-import { createModule, updateModule, getMyModules } from '../controllers/moduleController.js';
+import { createModule, updateModule, getMyModules, deleteModule } from '../controllers/moduleController.js';
 import { authenticate, isGuru } from '../middlewares/authMiddleware.js';
 import upload from '../middlewares/uploadMiddleware.js';
 

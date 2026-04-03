@@ -6,9 +6,7 @@ Sistem CBT SD adalah backend application berbasis Node.js yang ditujukan untuk m
 
 - **Role-Based Access Control (RBAC):** Autentikasi aman menggunakan JWT dengan batasan akses penuh per-role.
 - **Sistem Keamanan Sesi Ganda:** Mencegah satu user untuk login di banyak perangkat secara serentak. Jika login di perangkat baru, sesi lama akan otomatis keluar dengan pesan: `"Sedang login di perangkat lain"`.
-- **Manajemen Materi & Ujian (Guru):** Guru dapat mengelola Modul (PDF), membuat Bank Soal, dan menyusun Paket Ujian pilihan ganda & Uraian (Full CRUD).
-- **CBT Engine Berwaktu (Siswa):** Halaman ujian interaktif yang mengikuti jadwal `startTime` dan `deadline`.
-- **Penilaian Manual & Skor Agregat:** Guru dapat menilai soal Uraian secara manual. Skor total akhir adalah akumulasi Poin Pilgan + Poin Uraian.
+- **Penilaian Manual & Skor Independen:** Guru dapat menilai soal Uraian secara manual. Skor Pilihan Ganda (`scorePilgan`) dan Uraian (`scoreUraian`) dicatat secara terpisah sesuai jenis ujiannya.
 - **Laporan Otomatis:** Output JSON format untuk rekapitulasi nilai kelas keseluruhan.
 - **API Documentation Terintegrasi:** Spesifikasi lengkap menggunakan Swagger UI.
 
@@ -103,6 +101,6 @@ Seluruh request yang membutuhkan autentikasi harus menyertakan Header:
 2. **Guru** login, mengunggah materi belajar, menyusun soal, dan menentukan jadwal ujian.
 3. **Siswa** mengerjakan ujian sesuai jadwal. Sistem otomatis mengoreksi Pilihan Ganda.
 4. **Guru** masuk ke menu grading untuk mengoreksi Soal Uraian secara manual.
-5. **Score Final** (Pilgan + Uraian) tersimpan secara otomatis dan dapat dilihat oleh Siswa maupun Guru/Admin via Laporan.
+5. **Skor Independen**: Nilai Pilihan Ganda dan Nilai Uraian tersimpan secara terpisah dan dapat dipantau oleh Siswa maupun Guru/Admin via Laporan.
 
 **Swagger Docs:** `http://localhost:3000/api-docs`

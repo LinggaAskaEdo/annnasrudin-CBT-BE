@@ -1,6 +1,10 @@
 import express from 'express';
-import { createExamPackage, createQuestion, getBankSoal, getMyPackages } from '../controllers/examController.js';
-import { scheduleExam, getMySchedules } from '../controllers/scheduleController.js';
+import { 
+  createExamPackage, updateExamPackage, deleteExamPackage, 
+  createQuestion, updateQuestion, deleteQuestion, 
+  getBankSoal, getMyPackages 
+} from '../controllers/examController.js';
+import { scheduleExam, getMySchedules, updateSchedule, deleteSchedule } from '../controllers/scheduleController.js';
 import { authenticate, isGuru } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();

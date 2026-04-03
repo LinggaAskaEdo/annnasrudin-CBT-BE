@@ -116,7 +116,7 @@ export const submitExam = async (req, res, next) => {
         await prisma.hasilUjian.update({
             where: { id: session.id },
             data: {
-                score: finalScore,
+                scorePilgan: finalScore,
                 answers: gradedAnswers,
                 status: 'COMPLETED'
             }
@@ -127,7 +127,7 @@ export const submitExam = async (req, res, next) => {
     await prisma.hasilUjian.update({
         where: { id: session.id },
         data: {
-            score: finalScore,
+            scorePilgan: finalScore,
             answers: gradedAnswers,
             status: 'COMPLETED'
         }
@@ -138,7 +138,7 @@ export const submitExam = async (req, res, next) => {
     res.json({
         status: 'success',
         message: 'Exam submitted successfully',
-        score: finalScore
+        scorePilgan: finalScore
     });
   } catch (error) {
     winston.error(`Submitting exam failed: ${error.message}`);
