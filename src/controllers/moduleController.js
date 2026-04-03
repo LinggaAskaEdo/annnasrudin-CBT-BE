@@ -1,8 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import winston from '../utils/logger.js';
-import Joi from 'jole'; // Wait, joi, not jole
 import fs from 'fs';
-import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +9,7 @@ const prisma = new PrismaClient();
  */
 export const createModule = async (req, res, next) => {
   const { title, rombelId } = req.body;
-  
+
   if (!req.file) {
     return res.status(400).json({ status: 'error', message: 'PDF file is required' });
   }
@@ -50,14 +48,14 @@ export const updateModule = async (req, res, next) => {
   try {
     const existingModule = await prisma.modul.findUnique({ where: { id } });
     if (!existingModule || existingModule.guruId !== req.user.id) {
-        return res.status(403).json({ status: 'error', message: 'Forbidden' });
+      return res.status(403).json({ status: 'error', message: 'Forbidden' });
     }
 
     const data = { title, rombelId };
     if (req.file) {
-        // Delete old file
-        if (fs.existsSync(existingModule.filePath)) fs.unlinkSync(existingModule.filePath);
-        data.filePath = req.file.path;
+      // Delete old file
+      if (fs.existsSync(existingModule.filePath)) fs.unlinkSync(existingModule.filePath);
+      data.filePath = req.file.path;
     }
 
     const updated = await prisma.modul.update({
