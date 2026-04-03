@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  GURU
+  SISWA
+}
+
+enum QuestionType {
+  PILGAN
+  URAIAN
+}
+
+enum ExamStatus {
+  ONGOING
+  COMPLETED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  name      String
+  role             Role     @default(SISWA)
+  jabatan          String?
+  currentSessionId String?  // To track active login sessions
+  createdAt        DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Guru can teach multiple subjects
+  instructedMapels MataPelajaran[] @relation("GuruMapels")
+  
+  // Guru can create multiple modules
+  modules Modul[]
+  
+  // Guru can create multiple exam packages
+  paketUjians PaketUjian[]
+
+  // Siswa belongs to a Rombel
+  rombelId String?
+  rombel   Rombel? @relation(fields: [rombelId], references: [id])
+
+  // Results for Siswa
+  hasilUjians HasilUjian[]
+}
+
+model Rombel {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Many users (Siswa) in one Rombel
+  siswas User[]
+  
+  // Modules distributed to Rombel
+  modules Modul[]
+  
+  // Exams scheduled for Rombel
+  jadwalUjians JadwalUjian[]
+}
+
+model MataPelajaran {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Many gurus can teach one subject (and vice versa)
+  gurus User[] @relation("GuruMapels")
+
+  // Subject linked to exam packages
+  paketUjians PaketUjian[]
+}
+
+model Modul {
+  id        String   @id @default(uuid())
+  title     String
+  filePath  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Created by Guru
+  guruId String
+  guru   User   @relation(fields: [guruId], references: [id])
+
+  // Distributed to Rombel
+  rombelId String
+  rombel   Rombel @relation(fields: [rombelId], references: [id])
+}
+
+model PaketUjian {
+  id        String   @id @default(uuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Linked to Subject
+  mapelId String
+  mapel   MataPelajaran @relation(fields: [mapelId], references: [id])
+
+  // Created by Guru
+  guruId String
+  guru   User   @relation(fields: [guruId], references: [id])
+
+  // Questions in this package
+  soals Soal[]
+
+  // Schedules using this package
+  jadwalUjians JadwalUjian[]
+}
+
+model Soal {
+  id           String       @id @default(uuid())
+  questionType QuestionType @default(PILGAN)
+  questionText String       @db.Text
+  options      Json?        // Pilihan ganda options
+  correctAnswer String?     // Kunci jawaban (for pilgan or manual grading reference)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Part of an Exam Package
+  paketUjianId String
+  paketUjian   PaketUjian @relation(fields: [paketUjianId], references: [id])
+}
+
+model JadwalUjian {
+  id        String   @id @default(uuid())
+  startTime DateTime
+  endTime   DateTime
+  deadline  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Using a specific PaketUjian
+  paketUjianId String
+  paketUjian   PaketUjian @relation(fields: [paketUjianId], references: [id])
+
+  // Assigned to a Rombel
+  rombelId String
+  rombel   Rombel @relation(fields: [rombelId], references: [id])
+
+  // Results for this schedule
+  hasilUjians HasilUjian[]
+}
+
+model HasilUjian {
+  id        String     @id @default(uuid())
+  score     Float      @default(0)
+  answers   Json       // Student's answers
+  status    ExamStatus @default(ONGOING)
+  startTime DateTime   @default(now())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Student who took the exam
+  siswaId String
+  siswa   User   @relation(fields: [siswaId], references: [id])
+
+  // Part of a specific schedule
+  jadwalUjianId String
+  jadwalUjian   JadwalUjian @relation(fields: [jadwalUjianId], references: [id])
+}
