@@ -1,0 +1,388 @@
+openapi: 3.0.0
+info:
+  title: Sistem CBT SD API
+  description: Dokumentasi lengkap API Sistem Ujian Berbasis Komputer (CBT) SD.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Local Development Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Masukkan token JWT yang didapatkan dari login.
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          example: "Deskripsi error"
+
+    ValidationError:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          example: '"nama_field" is required'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, GURU, SISWA]
+        jabatan:
+          type: string
+          nullable: true
+        rombelId:
+          type: string
+          format: uuid
+          nullable: true
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+  - name: Admin
+  - name: Teacher
+  - name: Modules
+  - name: Exams
+  - name: Student
+  - name: Reports
+
+paths:
+  /auth/login:
+    post:
+      summary: Login User
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                  example: "admin"
+                password:
+                  type: string
+                  example: "admin123"
+      responses:
+        '200':
+          description: Berhasil login
+          content:
+            application/json:
+              example:
+                status: success
+                data:
+                  user: { id: "123", username: "admin", name: "Super Admin", role: "ADMIN" }
+                  token: "eyJhbGciOiJIUzI1NiIsIn..."
+                  sessionId: "432e4567-..."
+        '400':
+          description: Validasi Gagal
+          content:
+            application/json:
+              example: { status: "error", message: "\"password\" is required" }
+        '401':
+          description: Kredensial Salah
+          content:
+            application/json:
+              example: { status: "error", message: "Invalid username or password" }
+
+  /admin/users:
+    post:
+      summary: Buat User Baru (Guru / Siswa)
+      tags: [Admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, name, role]
+              properties:
+                username: { type: string, example: "siswa_budi" }
+                name: { type: string, example: "Budi Santoso" }
+                role: { type: string, enum: [GURU, SISWA], example: "SISWA" }
+                jabatan: { type: string, example: "Siswa Kelas 6" }
+                rombelId: { type: string, format: uuid, example: "uuid" }
+      responses:
+        '201':
+          description: User berhasil dibuat
+          content:
+            application/json:
+              example:
+                status: success
+                data:
+                  user: { id: "uuid", username: "siswa_budi", name: "Budi Santoso", role: "SISWA" }
+                  defaultPassword: "H7HGX4"
+        '400':
+          description: Username sudah ada
+          content:
+            application/json:
+              example: { status: "error", message: "Username already exists" }
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+    get:
+      summary: Daftar semua user
+      tags: [Admin]
+      parameters:
+        - in: query
+          name: role
+          schema: { type: string }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example:
+                status: success
+                data: [ { id: "uuid", username: "guru1", role: "GURU" } ]
+
+  /teacher/profile:
+    patch:
+      summary: Update Profil Guru
+      tags: [Teacher]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password: { type: string, example: "newpass123" }
+                name: { type: string, example: "Guru Budi S.Pd" }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: { status: "success", data: { id: "uuid", name: "Guru Budi S.Pd" } }
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /teacher/submissions/{hasilUjianId}/grade:
+    patch:
+      summary: Berikan nilai & feedback soal Uraian
+      tags: [Teacher]
+      parameters:
+        - in: path
+          name: hasilUjianId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uraianGrades:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      soalId: { type: string, format: uuid }
+                      teacherScore: { type: integer, example: 85 }
+                      feedback: { type: string, example: "Jawaban sangat bagus dan runut" }
+      responses:
+        '200':
+          description: Berhasil dinilai
+          content:
+            application/json:
+              example: { status: "success", message: "Grading updated successfully" }
+
+  /modules:
+    post:
+      summary: Upload Modul (PDF)
+      tags: [Modules]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title: { type: string, example: "Modul IPA Bab 1" }
+                rombelId: { type: string, format: uuid }
+                pdf: { type: string, format: binary }
+      responses:
+        '201':
+          description: Modul Dibuat
+          content:
+            application/json:
+              example: { status: "success", data: { id: "uuid", title: "Modul IPA Bab 1" } }
+
+  /exams/packages:
+    post:
+      summary: Buat Paket Ujian
+      tags: [Exams]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string, example: "Ujian Tengah Semester IPA" }
+                mapelId: { type: string, format: uuid }
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              example: { status: "success", data: { id: "uuid", title: "UTS IPA" } }
+
+  /exams/questions:
+    post:
+      summary: Tambah Soal ke Paket Ujian
+      tags: [Exams]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paketUjianId: { type: string, format: uuid }
+                questionType: { type: string, enum: [PILGAN, URAIAN], example: "PILGAN" }
+                questionText: { type: string, example: "Apa ibukota Indonesia?" }
+                options:
+                  type: array
+                  example: ["Jakarta", "Bandung", "Surabaya", "Medan"]
+                correctAnswer: { type: string, example: "Jakarta" }
+      responses:
+        '201':
+          description: OK
+        '403':
+          description: Forbidden (Bukan milik Guru)
+          content:
+            application/json:
+              example: { status: "error", message: "Forbidden" }
+
+  /student/exams/{scheduleId}/start:
+    post:
+      summary: Siswa memulai pengerjaan Ujian
+      tags: [Student]
+      parameters:
+        - in: path
+          name: scheduleId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example:
+                status: success
+                data:
+                  session: { id: "uuid", status: "ONGOING", startTime: "2026-04-03T10:00:00Z" }
+                  questions: [ { id: "uuid", questionText: "Soal", options: ["A", "B", "C", "D"] } ]
+        '400':
+          description: Ujian belum waktunya / Sudah dikerjakan
+          content:
+            application/json:
+              example: { status: "error", message: "Exam not available at this time" }
+
+  /student/exams/{scheduleId}/submit:
+    post:
+      summary: Siswa mengumpulkan jawaban ujian (Auto-grading)
+      tags: [Student]
+      parameters:
+        - in: path
+          name: scheduleId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      soalId: { type: string, format: uuid }
+                      answer: { type: string, example: "A" }
+      responses:
+        '200':
+          description: Berhasil submit
+          content:
+            application/json:
+              example: { status: "success", message: "Exam submitted successfully", score: 100 }
+        '400':
+          description: Tidak ada sesi ujian aktif
+        '500':
+          description: Internal Server Error
+
+  /reports/exams/{scheduleId}:
+    get:
+      summary: Laporan Nilai Akhir Kelas (Format JSON)
+      tags: [Reports]
+      parameters:
+        - in: path
+          name: scheduleId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                  examTitle: "Ulangan Harian"
+                  subject: "Matematika"
+                  rombel: "Kelas 6A"
+                  results:
+                    - studentName: "Budi"
+                      username: "siswa_budi"
+                      autoScore: 80
+                      uraianTotalPoints: 15
+                      status: "COMPLETED"
+                      submittedAt: "2026-04-03T10:30:00Z"
+        '404':
+          description: Ujian tidak ditemukan

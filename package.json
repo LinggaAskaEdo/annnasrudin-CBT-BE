@@ -28,13 +28,17 @@
     "joi": "^18.1.2",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0",
     "winston": "^3.19.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.2",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
     "babel-jest": "^30.3.0",
     "dotenv": "^17.4.0",
     "jest": "^30.3.0",
