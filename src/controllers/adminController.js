@@ -43,23 +43,27 @@ export const createUser = async (req, res, next) => {
 
     // Generate random default password (Uppercase + Numbers)
     const defaultPassword = generateDefaultPassword(6);
-    const hashedPassword = await hashPassword(defaultPassword);
+
+    // ONLY hash if role is ADMIN
+    const finalPassword = (role === 'ADMIN')
+      ? await hashPassword(defaultPassword)
+      : defaultPassword;
 
     const newUser = await prisma.user.create({
       data: {
         username,
-        password: hashedPassword,
+        password: finalPassword,
         name,
         role,
         jabatan,
         rombelId
       },
       select: {
-          id: true,
-          username: true,
-          name: true,
-          role: true,
-          createdAt: true
+        id: true,
+        username: true,
+        name: true,
+        role: true,
+        createdAt: true
       }
     });
 
@@ -108,6 +112,11 @@ export const getAllUsers = async (req, res, next) => {
         role: true,
         jabatan: true,
         rombelId: true,
+        rombel: {
+          select: {
+            name: true
+          }
+        },
         createdAt: true
       }
     });
@@ -151,7 +160,7 @@ export const updateAdminProfile = async (req, res, next) => {
     if (name) updateData.name = name;
 
     if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({ status: 'error', message: 'No data provided to update' });
+      return res.status(400).json({ status: 'error', message: 'No data provided to update' });
     }
 
     const updatedUser = await prisma.user.update({
@@ -222,10 +231,10 @@ export const changeUserPassword = async (req, res, next) => {
   const { id } = req.params;
   const { newPassword } = req.body;
 
-  if (!newPassword || newPassword.length < 6) {
+  if (!newPassword) {
     return res.status(400).json({
       status: 'error',
-      message: 'Password baru minimal 6 karakter'
+      message: 'Password baru tidak boleh kosong'
     });
   }
 
@@ -235,11 +244,14 @@ export const changeUserPassword = async (req, res, next) => {
       return res.status(404).json({ status: 'error', message: 'User tidak ditemukan' });
     }
 
-    const hashedPassword = await hashPassword(newPassword);
-    
+    // ONLY hash if role is ADMIN
+    const finalPassword = (userToUpdate.role === 'ADMIN')
+      ? await hashPassword(newPassword)
+      : newPassword;
+
     await prisma.user.update({
       where: { id },
-      data: { password: hashedPassword }
+      data: { password: finalPassword }
     });
 
     winston.info(`Admin ${req.user.username} changed password for user: ${userToUpdate.username}`);
@@ -250,6 +262,58 @@ export const changeUserPassword = async (req, res, next) => {
     });
   } catch (error) {
     winston.error(`Admin change password failed: ${error.message}`);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+/**
+ * Create a new Rombel (Class)
+ */
+export const createRombel = async (req, res, next) => {
+  const schema = Joi.object({
+    name: Joi.string().required()
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ status: 'error', message: error.details[0].message });
+  }
+
+  const { name } = req.body;
+
+  try {
+    const existing = await prisma.rombel.findUnique({ where: { name } });
+    if (existing) {
+      return res.status(400).json({ status: 'error', message: 'Nama rombel sudah ada' });
+    }
+
+    const newRombel = await prisma.rombel.create({
+      data: { name }
+    });
+
+    winston.info(`${req.user.role} ${req.user.username} created rombel: ${name}`);
+
+    res.status(201).json({
+      status: 'success',
+      data: newRombel
+    });
+  } catch (error) {
+    winston.error(`Create rombel failed: ${error.message}`);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+/**
+ * List all Rombels
+ */
+export const getAllRombels = async (req, res, next) => {
+  try {
+    const rombels = await prisma.rombel.findMany({
+      orderBy: { name: 'asc' }
+    });
+    res.json({ status: 'success', data: rombels });
+  } catch (error) {
+    winston.error(`Fetching rombels failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };

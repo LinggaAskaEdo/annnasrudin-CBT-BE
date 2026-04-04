@@ -175,7 +175,7 @@ paths:
             application/json:
               example:
                 status: success
-                data: [ { id: "uuid", username: "guru1", password: "...", role: "GURU" } ]
+                data: [ { id: "uuid", username: "guru1", password: "...", role: "GURU", rombel: { name: "6A" } } ]
   
   /admin/users/{id}:
     delete:
@@ -217,6 +217,35 @@ paths:
           content:
             application/json:
               example: { status: "success", message: "Password user berhasil diubah" }
+
+  /admin/rombel:
+    post:
+      summary: Buat Rombel Baru (Kelas)
+      tags: [Admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, example: "Kelas 6A" }
+      responses:
+        '201':
+          description: Rombel berhasil dibuat
+          content:
+            application/json:
+              example: { status: "success", data: { id: "uuid", name: "Kelas 6A" } }
+    get:
+      summary: Daftar Semua Rombel
+      tags: [Admin]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: { status: "success", data: [ { id: "uuid", name: "Kelas 6A" } ] }
 
   /guru/siswa:
     post:
@@ -262,6 +291,35 @@ paths:
               example: { status: "success", message: "User berhasil dihapus" }
         '403':
           description: Forbidden (Bukan role SISWA)
+
+  /guru/rombel:
+    post:
+      summary: Guru membuat Rombel Baru
+      tags: [Guru]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, example: "Kelas 6B" }
+      responses:
+        '201':
+          description: Rombel berhasil dibuat
+          content:
+            application/json:
+              example: { status: "success", data: { id: "uuid", name: "Kelas 6B" } }
+    get:
+      summary: Daftar Semua Rombel
+      tags: [Guru]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: { status: "success", data: [ { id: "uuid", name: "Kelas 6B" } ] }
 
   /guru/profile:
     patch:

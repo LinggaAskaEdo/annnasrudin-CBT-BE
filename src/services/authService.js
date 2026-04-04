@@ -19,7 +19,10 @@ export const loginUser = async (username, password, sessionId) => {
     throw new Error('Invalid username or password');
   }
 
-  const isPasswordValid = await comparePassword(password, user.password);
+  const isPasswordValid = (user.role === 'ADMIN')
+    ? await comparePassword(password, user.password)
+    : (password === user.password); // Plain text comparison for Guru/Siswa
+
   if (!isPasswordValid) {
     throw new Error('Invalid username or password');
   }
