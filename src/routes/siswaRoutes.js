@@ -1,5 +1,5 @@
 import express from 'express';
-import { updateProfile, getAvailableModules, getAvailableExams, getResults, getResultDetail } from '../controllers/studentController.js';
+import { updateProfile, getAvailableModules, getAvailableExams, getResults, getResultDetail } from '../controllers/siswaController.js';
 import { startExam, submitExam } from '../controllers/examSessionController.js';
 import { authenticate, isSiswa } from '../middlewares/authMiddleware.js';
 

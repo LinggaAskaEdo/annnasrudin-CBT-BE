@@ -27,21 +27,21 @@ export const updateProfile = async (req, res, next) => {
 };
 
 /**
- * Get modules assigned to the student's Rombel.
+ * Get modules assigned to the siswa's Rombel.
  */
 export const getAvailableModules = async (req, res, next) => {
   try {
-    const student = await prisma.user.findUnique({
+    const siswa = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: { rombelId: true }
     });
 
-    if (!student.rombelId) {
+    if (!siswa.rombelId) {
       return res.json({ status: 'success', data: [] });
     }
 
     const modules = await prisma.modul.findMany({
-      where: { rombelId: student.rombelId },
+      where: { rombelId: siswa.rombelId },
       include: { guru: { select: { name: true } } }
     });
 
@@ -56,18 +56,18 @@ export const getAvailableModules = async (req, res, next) => {
  */
 export const getAvailableExams = async (req, res, next) => {
   try {
-    const student = await prisma.user.findUnique({
+    const siswa = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: { rombelId: true }
     });
 
-    if (!student.rombelId) {
+    if (!siswa.rombelId) {
        return res.json({ status: 'success', data: [] });
     }
 
     const now = new Date();
     const schedules = await prisma.jadwalUjian.findMany({
-      where: { rombelId: student.rombelId },
+      where: { rombelId: siswa.rombelId },
       include: {
         paketUjian: { select: { title: true, mapel: { select: { name: true } } } },
         hasilUjians: { where: { siswaId: req.user.id } }
@@ -102,7 +102,7 @@ export const getAvailableExams = async (req, res, next) => {
 };
 
 /**
- * List history of results for the student.
+ * List history of results for the siswa.
  */
 export const getResults = async (req, res, next) => {
   try {

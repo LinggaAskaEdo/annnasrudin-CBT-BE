@@ -76,17 +76,17 @@ Seluruh request yang membutuhkan autentikasi harus menyertakan Header:
 | POST/PUT/DELETE | `/api/exams/packages` | Kelola Paket Ujian |
 | POST/PUT/DELETE | `/api/exams/questions` | Kelola Bank Soal |
 | POST/PUT/DELETE | `/api/exams/schedule` | Kelola Jadwal Ujian Rombel |
-| GET | `/api/teacher/students` | Lihat daftar siswa per Rombel |
-| PATCH | `/api/teacher/submissions/:id/grade` | Berikan nilai & feedback Uraian |
+| GET | `/api/guru/siswa` | Lihat daftar siswa per Rombel |
+| PATCH | `/api/guru/submissions/:id/grade` | Berikan nilai & feedback Uraian |
 
 ### 👶 Siswa (Pengerjaan Ujian)
 | Method | Endpoint | Deskripsi |
 | :--- | :--- | :--- |
-| GET | `/api/student/modules` | Lihat modul yang tersedia untuk Rombelnya |
-| GET | `/api/student/exams` | Lihat jadwal ujian aktif/mendatang |
-| POST | `/api/student/exams/:id/start` | Mulai sesi ujian (mendapat soal) |
-| POST | `/api/student/exams/:id/submit` | Kirim jawaban ujian (Auto-grading Pilgan) |
-| GET | `/api/student/results` | Lihat riwayat dan detail nilai |
+| GET | `/api/siswa/modules` | Lihat modul yang tersedia untuk Rombelnya |
+| GET | `/api/siswa/exams` | Lihat jadwal ujian aktif/mendatang |
+| POST | `/api/siswa/exams/:id/start` | Mulai sesi ujian (mendapat soal) |
+| POST | `/api/siswa/exams/:id/submit` | Kirim jawaban ujian (Auto-grading Pilgan) |
+| GET | `/api/siswa/results` | Lihat riwayat dan detail nilai |
 
 ### 📊 Laporan
 | Method | Endpoint | Deskripsi |

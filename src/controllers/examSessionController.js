@@ -4,7 +4,7 @@ import winston from '../utils/logger.js';
 const prisma = new PrismaClient();
 
 /**
- * Student starts an exam session.
+ * Siswa starts an exam session.
  */
 export const startExam = async (req, res, next) => {
   const { scheduleId } = req.params;
@@ -54,8 +54,8 @@ export const startExam = async (req, res, next) => {
       }
     });
 
-    // Strip correct answers before sending to student
-    const questionsForStudent = schedule.paketUjian.soals.map(s => {
+    // Strip correct answers before sending to siswa
+    const questionsForSiswa = schedule.paketUjian.soals.map(s => {
       const { correctAnswer, ...safeQuestion } = s;
       return safeQuestion;
     });
@@ -64,7 +64,7 @@ export const startExam = async (req, res, next) => {
       status: 'success',
       data: {
           session: result,
-          questions: questionsForStudent
+          questions: questionsForSiswa
       }
     });
   } catch (error) {
@@ -74,7 +74,7 @@ export const startExam = async (req, res, next) => {
 };
 
 /**
- * Student submits their exam answers.
+ * Siswa submits their exam answers.
  * Auto-grades Pilihan Ganda (Pilgan).
  */
 export const submitExam = async (req, res, next) => {

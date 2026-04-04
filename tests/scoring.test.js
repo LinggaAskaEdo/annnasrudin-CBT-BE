@@ -75,7 +75,7 @@ describe('Scoring Logic Unit Tests', () => {
       ];
 
       const res = await request(app)
-        .post('/api/student/exams/schedule-1/submit')
+        .post('/api/siswa/exams/schedule-1/submit')
         .set('Authorization', `Bearer ${mockToken}`)
         .send({ answers: responses });
 
@@ -119,7 +119,7 @@ describe('Scoring Logic Unit Tests', () => {
       });
 
       const uraianGrades = [
-        { soalId: '3', teacherScore: 10, feedback: 'Bagus' }
+        { soalId: '3', guruScore: 10, feedback: 'Bagus' }
       ];
 
       // Change role to GURU for this test
@@ -128,7 +128,7 @@ describe('Scoring Logic Unit Tests', () => {
       });
 
       const res = await request(app)
-        .patch('/api/teacher/submissions/hasil-1/grade')
+        .patch('/api/guru/submissions/hasil-1/grade')
         .set('Authorization', `Bearer ${mockToken}`)
         .send({ uraianGrades });
 

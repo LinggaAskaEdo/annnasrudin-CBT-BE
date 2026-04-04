@@ -62,7 +62,7 @@ model Rombel {
   updatedAt DateTime @updatedAt
 
   // Many users (Siswa) in one Rombel
-  siswas User[]
+  siswa User[]
   
   // Modules distributed to Rombel
   modules Modul[]
@@ -77,8 +77,8 @@ model MataPelajaran {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Many gurus can teach one subject (and vice versa)
-  gurus User[] @relation("GuruMapels")
+  // Many guru can teach one subject (and vice versa)
+  guru User[] @relation("GuruMapels")
 
   // Subject linked to exam packages
   paketUjians PaketUjian[]
@@ -160,13 +160,13 @@ model HasilUjian {
   score       Float      @default(0) // Deprecated total score
   scorePilgan Float      @default(0)
   scoreUraian Float      @default(0)
-  answers     Json       // Student's answers
+  answers     Json       // Siswa's answers
   status      ExamStatus @default(ONGOING)
   startTime   DateTime   @default(now())
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  // Student who took the exam
+  // Siswa who took the exam
   siswaId String
   siswa   User   @relation(fields: [siswaId], references: [id])
 

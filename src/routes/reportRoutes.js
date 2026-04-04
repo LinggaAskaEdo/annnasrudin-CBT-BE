@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(authenticate);
 router.use(isGuru);
 
-// Teacher/Admin can view classroom-wide report in JSON
+// Guru/Admin can view classroom-wide report in JSON
 router.get('/exams/:scheduleId', getClassroomReport);
 
 export default router;

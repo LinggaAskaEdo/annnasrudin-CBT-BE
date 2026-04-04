@@ -72,10 +72,10 @@ security:
 tags:
   - name: Auth
   - name: Admin
-  - name: Teacher
+  - name: Guru
   - name: Modules
   - name: Exams
-  - name: Student
+  - name: Siswa
   - name: Reports
 
 paths:
@@ -176,10 +176,10 @@ paths:
                 status: success
                 data: [ { id: "uuid", username: "guru1", role: "GURU" } ]
 
-  /teacher/profile:
+  /guru/profile:
     patch:
       summary: Update Profil Guru
-      tags: [Teacher]
+      tags: [Guru]
       requestBody:
         content:
           application/json:
@@ -200,10 +200,10 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
 
-  /teacher/submissions/{hasilUjianId}/grade:
+  /guru/submissions/{hasilUjianId}/grade:
     patch:
       summary: Berikan nilai & feedback soal Uraian
-      tags: [Teacher]
+      tags: [Guru]
       parameters:
         - in: path
           name: hasilUjianId
@@ -222,7 +222,7 @@ paths:
                     type: object
                     properties:
                       soalId: { type: string, format: uuid }
-                      teacherScore: { type: integer, example: 85 }
+                      guruScore: { type: integer, example: 85 }
                       feedback: { type: string, example: "Jawaban sangat bagus dan runut" }
       responses:
         '200':
@@ -298,10 +298,10 @@ paths:
             application/json:
               example: { status: "error", message: "Forbidden" }
 
-  /student/exams/{scheduleId}/start:
+  /siswa/exams/{scheduleId}/start:
     post:
       summary: Siswa memulai pengerjaan Ujian
-      tags: [Student]
+      tags: [Siswa]
       parameters:
         - in: path
           name: scheduleId
@@ -323,10 +323,10 @@ paths:
             application/json:
               example: { status: "error", message: "Exam not available at this time" }
 
-  /student/exams/{scheduleId}/submit:
+  /siswa/exams/{scheduleId}/submit:
     post:
       summary: Siswa mengumpulkan jawaban ujian (Auto-grading)
-      tags: [Student]
+      tags: [Siswa]
       parameters:
         - in: path
           name: scheduleId
@@ -378,7 +378,7 @@ paths:
                   subject: "Matematika"
                   rombel: "Kelas 6A"
                   results:
-                    - studentName: "Budi"
+                    - siswaName: "Budi"
                       username: "siswa_budi"
                       autoScore: 80
                       uraianTotalPoints: 15

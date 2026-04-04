@@ -4,7 +4,7 @@ import winston from '../utils/logger.js';
 const prisma = new PrismaClient();
 
 /**
- * Generates a JSON report for all student results in a specific exam schedule.
+ * Generates a JSON report for all siswa results in a specific exam schedule.
  */
 export const getClassroomReport = async (req, res, next) => {
   const { scheduleId } = req.params;
@@ -31,7 +31,7 @@ export const getClassroomReport = async (req, res, next) => {
 
     const processedResults = schedule.hasilUjians.map(h => {
         return {
-            studentName: h.siswa.name,
+            siswaName: h.siswa.name,
             username: h.siswa.username,
             scorePilgan: h.scorePilgan,
             scoreUraian: h.scoreUraian,

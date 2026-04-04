@@ -64,7 +64,7 @@ export const createQuestion = async (req, res, next) => {
 };
 
 /**
- * Bank Soal: Retrive all questions from all gurus.
+ * Bank Soal: Retrive all questions from all guru.
  */
 export const getBankSoal = async (req, res, next) => {
   const { mapelId, search } = req.query;

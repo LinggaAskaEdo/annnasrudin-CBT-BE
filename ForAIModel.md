@@ -168,7 +168,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 3.1 Profil Guru
 - **Method:** `PATCH`
-- **Endpoint:** `/teacher/profile`
+- **Endpoint:** `/guru/profile`
 - **Akses:** GURU
 - **Request Body (JSON):**
   ```json
@@ -184,7 +184,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 3.2 Daftar Siswa
 - **Method:** `GET`
-- **Endpoint:** `/teacher/students`
+- **Endpoint:** `/guru/siswa`
 - **Akses:** GURU
 - **Response Sukses (200 OK):**
   ```json
@@ -198,7 +198,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 3.3 Dashboard Hasil Ujian (Rekap)
 - **Method:** `GET`
-- **Endpoint:** `/teacher/exam-results`
+- **Endpoint:** `/guru/exam-results`
 - **Akses:** GURU
 - **Response Sukses (200 OK):**
   ```json
@@ -218,7 +218,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 3.4 Detail Pengerjaan Siswa (Untuk Grading)
 - **Method:** `GET`
-- **Endpoint:** `/teacher/submissions/:hasilUjianId`
+- **Endpoint:** `/guru/submissions/:hasilUjianId`
 - **Akses:** GURU
 - **Path Params:** `hasilUjianId` (UUID)
 - **Response Sukses (200 OK):**
@@ -226,14 +226,14 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
   {
     "status": "success",
     "data": {
-      "studentName": "Andi",
+      "siswaName": "Andi",
       "examTitle": "UTS IPA",
       "answers": [
         {
           "soalId": "uuid",
           "questionText": "Jelaskan...",
           "type": "URAIAN",
-          "studentAnswer": "Karena...",
+          "siswaAnswer": "Karena...",
           "score": null
         }
       ]
@@ -247,7 +247,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 3.5 Memberikan Nilai Manual (Grading)
 - **Method:** `PATCH`
-- **Endpoint:** `/teacher/submissions/:hasilUjianId/grade`
+- **Endpoint:** `/guru/submissions/:hasilUjianId/grade`
 - **Akses:** GURU
 - **Path Params:** `hasilUjianId` (UUID)
 - **Request Body (JSON):**
@@ -256,7 +256,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
     "uraianGrades": [
       {
         "soalId": "uuid-soal",
-        "teacherScore": 85,
+        "guruScore": 85,
         "feedback": "Bagus"
       }
     ]
@@ -495,7 +495,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 8.1 Profil Siswa
 - **Method:** `PATCH`
-- **Endpoint:** `/student/profile`
+- **Endpoint:** `/siswa/profile`
 - **Akses:** SISWA
 - **Request Body (JSON):**
   ```json
@@ -508,7 +508,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 8.2 Ambil Daftar Modul
 - **Method:** `GET`
-- **Endpoint:** `/student/modules`
+- **Endpoint:** `/siswa/modules`
 - **Akses:** SISWA
 - **Response Sukses (200 OK):**
   ```json
@@ -517,7 +517,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 8.3 Ambil Daftar Ujian (Jadwal)
 - **Method:** `GET`
-- **Endpoint:** `/student/exams`
+- **Endpoint:** `/siswa/exams`
 - **Akses:** SISWA
 - **Response Sukses (200 OK):**
   ```json
@@ -536,7 +536,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 8.4 Mulai Ujian
 - **Method:** `POST`
-- **Endpoint:** `/student/exams/:scheduleId/start`
+- **Endpoint:** `/siswa/exams/:scheduleId/start`
 - **Akses:** SISWA
 - **Path Params:** `scheduleId` (UUID)
 - **Response Sukses (200 OK):**
@@ -568,7 +568,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 8.5 Kumpulkan Jawaban Ujian
 - **Method:** `POST`
-- **Endpoint:** `/student/exams/:scheduleId/submit`
+- **Endpoint:** `/siswa/exams/:scheduleId/submit`
 - **Akses:** SISWA
 - **Path Params:** `scheduleId` (UUID)
 - **Request Body (JSON):**
@@ -591,7 +591,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 8.6 Riwayat Ujian Siswa
 - **Method:** `GET`
-- **Endpoint:** `/student/results`
+- **Endpoint:** `/siswa/results`
 - **Akses:** SISWA
 - **Response Sukses (200 OK):**
   ```json
@@ -603,7 +603,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
 
 ### 8.7 Detail Jawaban Ujian Siswa
 - **Method:** `GET`
-- **Endpoint:** `/student/results/:hasilUjianId`
+- **Endpoint:** `/siswa/results/:hasilUjianId`
 - **Akses:** SISWA
 - **Path Params:** `hasilUjianId` (UUID)
 - **Response Sukses (200 OK):**
@@ -614,7 +614,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
       "examTitle": "UTS IPA",
       "score": 85,
       "answers": [
-        { "questionText": "...", "studentAnswer": "...", "isCorrect": true, "score": 10 }
+        { "questionText": "...", "siswaAnswer": "...", "isCorrect": true, "score": 10 }
       ]
     }
   }
@@ -639,7 +639,7 @@ Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (ter
       "rombel": "Kelas 6A",
       "results": [
         {
-          "studentName": "Andi",
+          "siswaName": "Andi",
           "username": "siswa_andi",
           "autoScore": 75,
           "uraianTotalPoints": 15,

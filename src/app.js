@@ -5,10 +5,10 @@ import 'dotenv/config';
 
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import teacherRoutes from './routes/teacherRoutes.js';
+import guruRoutes from './routes/guruRoutes.js';
 import moduleRoutes from './routes/moduleRoutes.js';
 import examRoutes from './routes/examRoutes.js';
-import studentRoutes from './routes/studentRoutes.js';
+import siswaRoutes from './routes/siswaRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
@@ -40,10 +40,10 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/teacher', teacherRoutes);
+app.use('/api/guru', guruRoutes);
 app.use('/api/modules', moduleRoutes);
 app.use('/api/exams', examRoutes);
-app.use('/api/student', studentRoutes);
+app.use('/api/siswa', siswaRoutes);
 app.use('/api/reports', reportRoutes);
 
 // Basic Routes Placeholder

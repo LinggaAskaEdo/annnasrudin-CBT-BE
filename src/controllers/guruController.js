@@ -69,9 +69,9 @@ export const updateProfile = async (req, res, next) => {
 };
 
 /**
- * Lists all students with ROMBEL filter and search.
+ * Lists all siswa with ROMBEL filter and search.
  */
-export const getStudents = async (req, res, next) => {
+export const getSiswa = async (req, res, next) => {
   const { rombelId, search } = req.query;
 
   try {
@@ -84,7 +84,7 @@ export const getStudents = async (req, res, next) => {
       ];
     }
 
-    const students = await prisma.user.findMany({
+    const siswa = await prisma.user.findMany({
       where: filters,
       select: {
         id: true,
@@ -97,10 +97,10 @@ export const getStudents = async (req, res, next) => {
 
     res.json({
       status: 'success',
-      data: students
+      data: siswa
     });
   } catch (error) {
-    winston.error(`Fetching students failed: ${error.message}`);
+    winston.error(`Fetching siswa failed: ${error.message}`);
     res.status(500).json({
       status: 'error',
       message: error.message
@@ -109,7 +109,7 @@ export const getStudents = async (req, res, next) => {
 };
 
 /**
- * Guru gets a specific student submission to grade.
+ * Guru gets a specific siswa submission to grade.
  */
 export const getSubmissionDetail = async (req, res, next) => {
   const { hasilUjianId } = req.params;
@@ -136,7 +136,7 @@ export const getSubmissionDetail = async (req, res, next) => {
  */
 export const gradeUraian = async (req, res, next) => {
   const { hasilUjianId } = req.params;
-  const { uraianGrades } = req.body; // Array of { soalId, teacherScore, feedback }
+  const { uraianGrades } = req.body; // Array of { soalId, guruScore, feedback }
 
   try {
     const submission = await prisma.hasilUjian.findUnique({
@@ -150,7 +150,7 @@ export const gradeUraian = async (req, res, next) => {
         if (grade && ans.type === 'URAIAN') {
             return {
                 ...ans,
-                teacherScore: grade.teacherScore,
+                guruScore: grade.guruScore,
                 feedback: grade.feedback
             };
         }
@@ -162,7 +162,7 @@ export const gradeUraian = async (req, res, next) => {
      */
     let totalUraianScore = 0;
     updatedAnswers.forEach(ans => {
-        if (ans.type === 'URAIAN') totalUraianScore += (ans.teacherScore || 0);
+        if (ans.type === 'URAIAN') totalUraianScore += (ans.guruScore || 0);
     });
 
     // Update the record
@@ -188,7 +188,7 @@ export const gradeUraian = async (req, res, next) => {
 };
 
 /**
- * View exam results for students of their rombel.
+ * View exam results for siswa of their rombel.
  */
 export const getExamResults = async (req, res, next) => {
   const { rombelId, jadwalUjianId } = req.query;
