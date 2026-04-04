@@ -47,6 +47,8 @@ describe('Scoring Logic Unit Tests', () => {
       role: 'SISWA', 
       currentSessionId: 'session-1' 
     });
+    // Default empty array for findMany
+    mPrisma.hasilUjian.findMany.mockResolvedValue([]);
   });
 
   describe('submitExam', () => {
@@ -60,6 +62,7 @@ describe('Scoring Logic Unit Tests', () => {
         deadline: new Date(Date.now() + 100000),
         paketUjian: {
           title: 'Ujian IPA',
+          mapel: { name: 'IPA' },
           soals: [
             { id: '1', questionType: 'PILGAN', correctAnswer: 'A' },
             { id: '2', questionType: 'PILGAN', correctAnswer: 'B' },
@@ -67,6 +70,12 @@ describe('Scoring Logic Unit Tests', () => {
           ]
         }
       });
+
+      // Mock findMany to return the specific session we want
+      mPrisma.hasilUjian.findMany.mockResolvedValue([{ id: 'session-1', status: 'ONGOING' }]);
+      
+      // Mock update to return something
+      mPrisma.hasilUjian.update.mockResolvedValue({ id: 'session-1', scorePilgan: 1 });
 
       const responses = [
         { soalId: '1', answer: 'A' }, // Correct
@@ -111,11 +120,31 @@ describe('Scoring Logic Unit Tests', () => {
       mPrisma.jadwalUjian.findUnique.mockResolvedValue({
         id: 'schedule-1',
         paketUjian: {
+          title: 'Ujian IPA',
+          mapel: { name: 'IPA' },
           soals: [
             { id: '1', questionType: 'PILGAN', correctAnswer: 'A' },
             { id: '3', questionType: 'URAIAN' }
           ]
         }
+      });
+
+      // Mock findUnique for submission
+      mPrisma.hasilUjian.findUnique.mockResolvedValue({
+        id: 'hasil-1',
+        scorePilgan: 1,
+        answers: [
+            { soalId: '1', answer: 'A', type: 'PILGAN' },
+            { soalId: '3', answer: 'Jawaban panjang', type: 'URAIAN' }
+        ],
+        siswa: { name: 'Test Siswa', rombel: { name: 'Class A' } },
+        jadwalUjian: { paketUjian: { title: 'Ujian IPA' } }
+      });
+
+      // Mock update to return the updated record
+      mPrisma.hasilUjian.update.mockResolvedValue({
+          id: 'hasil-1',
+          scoreUraian: 10
       });
 
       const uraianGrades = [

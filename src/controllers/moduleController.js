@@ -1,118 +1,83 @@
-import { PrismaClient } from '@prisma/client';
+import * as moduleService from '../services/moduleService.js';
 import winston from '../utils/logger.js';
-import fs from 'fs';
 
-const prisma = new PrismaClient();
-
-/**
- * Guru creates a learning module (PDF upload and assign to Rombel).
- */
 export const createModule = async (req, res, next) => {
   const { title, rombelId } = req.body;
-
   if (!req.file) {
-    return res.status(400).json({ status: 'error', message: 'PDF file is required' });
+    return res.status(400).json({ status: 'error', message: 'No file uploaded' });
   }
 
   try {
-    const newModule = await prisma.modul.create({
-      data: {
-        title,
-        filePath: req.file.path,
-        guruId: req.user.id,
-        rombelId
-      }
-    });
+    const filePath = req.file.path;
+    const newModul = await moduleService.createModul(title, filePath, req.user.id, rombelId);
 
-    winston.info(`Module ${newModule.title} created by Guru ${req.user.username}`);
+    winston.info(`Guru ${req.user.username} uploaded module ${title}`);
 
     res.status(201).json({
       status: 'success',
-      data: newModule
+      data: newModul
     });
   } catch (error) {
-    winston.error(`Module creation failed: ${error.message}`);
-    // Cleanup the uploaded file if database create fails
-    if (req.file) fs.unlinkSync(req.file.path);
+    winston.error(`Module upload failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
-/**
- * Guru updates a module.
- */
 export const updateModule = async (req, res, next) => {
   const { id } = req.params;
-  const { title, rombelId } = req.body;
+  const { title } = req.body;
+  const filePath = req.file ? req.file.path : undefined;
 
   try {
-    const existingModule = await prisma.modul.findUnique({ where: { id } });
-    if (!existingModule || existingModule.guruId !== req.user.id) {
-      return res.status(403).json({ status: 'error', message: 'Forbidden' });
-    }
-
-    const data = { title, rombelId };
-    if (req.file) {
-      // Delete old file
-      if (fs.existsSync(existingModule.filePath)) fs.unlinkSync(existingModule.filePath);
-      data.filePath = req.file.path;
-    }
-
-    const updated = await prisma.modul.update({
-      where: { id },
-      data
+    const updated = await moduleService.updateModul(id, title, filePath, req.user);
+    res.json({
+      status: 'success',
+      data: updated
     });
-
-    res.json({ status: 'success', data: updated });
   } catch (error) {
     winston.error(`Module update failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
-/**
- * Guru retrieves their modules.
- */
 export const getMyModules = async (req, res, next) => {
   try {
-    const modules = await prisma.modul.findMany({
-      where: { guruId: req.user.id },
-      include: { rombel: { select: { name: true } } }
+    const modules = await moduleService.getMyModules(req.user.id);
+    res.json({
+      status: 'success',
+      data: modules
     });
-    res.json({ status: 'success', data: modules });
   } catch (error) {
+    winston.error(`Fetching my modules failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
-/**
- * Guru deletes a module and its physical file.
- */
+export const getModulesByRombel = async (req, res, next) => {
+  try {
+    const modules = await moduleService.getModules(req.query, req.user);
+    res.json({
+      status: 'success',
+      data: modules
+    });
+  } catch (error) {
+    winston.error(`Fetching modules by rombel failed: ${error.message}`);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
 export const deleteModule = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const existingModule = await prisma.modul.findUnique({ where: { id } });
-    if (!existingModule || existingModule.guruId !== req.user.id) {
-      return res.status(403).json({ status: 'error', message: 'Forbidden' });
-    }
-
-    // Delete from DB first
-    await prisma.modul.delete({ where: { id } });
-
-    // Cleanup the physical file
-    if (fs.existsSync(existingModule.filePath)) {
-        fs.unlinkSync(existingModule.filePath);
-    }
-
-    winston.info(`Module ${existingModule.title} deleted by Guru ${req.user.username}`);
-
+    await moduleService.deleteModul(id, req.user);
+    winston.info(`Module ${id} deleted by ${req.user.username}`);
     res.json({
       status: 'success',
       message: 'Module deleted successfully'
     });
   } catch (error) {
-    winston.error(`Module deletion failed: ${error.message}`);
+    winston.error(`Delete module failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };

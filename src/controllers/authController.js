@@ -1,10 +1,7 @@
-import { loginUser } from '../services/authService.js';
+import { loginUser, logoutUser } from '../services/authService.js';
 import Joi from 'joi';
 import winston from '../utils/logger.js';
 import { v4 as uuidv4 } from 'uuid';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
 
 const loginSchema = Joi.object({
   username: Joi.string().required(),
@@ -53,10 +50,7 @@ export const login = async (req, res, next) => {
  */
 export const logout = async (req, res, next) => {
   try {
-    await prisma.user.update({
-      where: { id: req.user.id },
-      data: { currentSessionId: null }
-    });
+    await logoutUser(req.user.id);
 
     winston.info(`User ${req.user.username} logged out successfully.`);
 

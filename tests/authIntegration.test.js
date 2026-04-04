@@ -5,6 +5,7 @@ import { jest } from '@jest/globals';
 // but here it's usually named exports.
 jest.unstable_mockModule('../src/services/authService.js', () => ({
   loginUser: jest.fn(),
+  logoutUser: jest.fn(),
 }));
 
 const { default: app } = await import('../src/app.js');
