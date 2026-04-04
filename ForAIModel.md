@@ -1,367 +1,668 @@
-# API Documentation for AI Models & Junior Developers
+# API Documentation untuk AI Model & Frontend Developer
 
-Dokumen ini berisi daftar endpoint API, format request, serta contoh response (sukses dan error) untuk Sistem CBT SD.
+Dokumen ini berisi daftar komprehensif seluruh endpoint API, format request (termasuk HTTP Method, Body, Param, Query), serta contoh response (sukses dan error) secara spesifik untuk Sistem CBT SD. 
 
-## Informasi Umum
-- **Base URL:** `http://localhost:3000/api`
-- **Format Response:** JSON
-- **Autentikasi:** Menggunakan Bearer Token (JWT). Masukkan token di Header `Authorization: Bearer <token>`.
+## Aturan Umum (General Rules)
+- **Base URL:** `http://localhost:3000/api` (Dapat diubah mengikuti environment)
+- **Format Data:** Mayoritas menggunakan `application/json`, kecuali upload file (Modul) menggunakan `multipart/form-data`.
+- **Autentikasi:** Endpoint yang terproteksi wajib menyertakan header:
+  `Authorization: Bearer <token_jwt_anda>`
+- **Response Format Umum:**
+  Setiap response memiliki struktur dasar:
+  `{ "status": "success" | "error", "data": { ... } | "message": "..." }`
 
 ---
 
-## 1. Autentikasi (Auth)
+## 1. AUTHENTICATION (Otorisasi)
 
-### Login User
-- **Endpoint:** `POST /auth/login`
-- **Request Body:**
-```json
-{
-  "username": "admin",
-  "password": "password123"
-}
-```
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": {
-    "user": {
-      "id": "uuid-string",
-      "username": "admin",
-      "name": "Super Admin",
-      "role": "ADMIN"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsIn...",
-    "sessionId": "432e4567-e89b-12d3-a456-426614174000"
+### 1.1 Login
+- **Method:** `POST`
+- **Endpoint:** `/auth/login`
+- **Akses:** Public
+- **Request Body (JSON):**
+  ```json
+  {
+    "username": "admin",
+    "password": "password123"
   }
-}
-```
-- **Response Gagal (401 - Kredensial Salah):**
-```json
-{
-  "status": "error",
-  "message": "Invalid username or password"
-}
-```
+  ```
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "user": {
+        "id": "uuid",
+        "username": "admin",
+        "name": "Super Admin",
+        "role": "ADMIN" // atau GURU, SISWA
+      },
+      "token": "eyJhbG...",
+      "sessionId": "uuid"
+    }
+  }
+  ```
+- **Response Error (400 Bad Request - Validasi):**
+  ```json
+  {
+    "status": "error",
+    "message": "\"username\" is required"
+  }
+  ```
+- **Response Error (401 Unauthorized - Kredensial Salah):**
+  ```json
+  {
+    "status": "error",
+    "message": "Invalid username or password"
+  }
+  ```
 
-### Logout User
-- **Endpoint:** `POST /auth/logout`
+### 1.2 Logout
+- **Method:** `POST`
+- **Endpoint:** `/auth/logout`
+- **Akses:** All Authenticated Users
 - **Headers:** `Authorization: Bearer <token>`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "message": "Logged out successfully"
-}
-```
-
----
-
-## 2. Admin (Manajemen User)
-
-### Buat User Baru (Admin/Guru/Siswa)
-- **Endpoint:** `POST /admin/users`
-- **Request Body:**
-```json
-{
-  "username": "siswa_akbar",
-  "name": "Akbar Ramadhan",
-  "role": "SISWA",
-  "jabatan": "Siswa Kelas 6",
-  "rombelId": "uuid-rombel"
-}
-```
-- **Response Sukses (201):**
-```json
-{
-  "status": "success",
-  "data": {
-    "user": { "id": "uuid", "username": "siswa_akbar", "name": "Akbar Ramadhan", "role": "SISWA" },
-    "defaultPassword": "RAMDOMPASS"
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "message": "Logged out successfully"
   }
-}
-```
-
----
-
-## 3. Guru (Teacher) - Manajemen Pembelajaran & Ujian
-
-### Upload Modul (PDF)
-- **Endpoint:** `POST /modules`
-- **Format:** `multipart/form-data`
-- **Request Body:**
-  - `title` (text): "Judul Modul"
-  - `rombelId` (text): "uuid-rombel"
-  - `pdf` (file): File modul dalam format PDF.
-- **Response Sukses (201):**
-```json
-{
-  "status": "success",
-  "data": { "id": "uuid", "title": "Modul IPA Bab 1" }
-}
-```
-
-### Daftar Modul Saya (Guru)
-- **Endpoint:** `GET /modules/my`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": [ { "id": "uuid", "title": "IPA Bab 1", "pdfPath": "/uploads/..." } ]
-}
-```
-
-### Update Modul
-- **Endpoint:** `PUT /modules/:id`
-- **Format:** `multipart/form-data`
-- **Request Body:**
-  - `title` (text): "Judul Baru jika ingin diubah"
-  - `pdf` (file): File baru jika ingin diubah.
-
-### Hapus Modul
-- **Endpoint:** `DELETE /modules/:id`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "message": "Module deleted successfully"
-}
-```
-
-### Buat Paket Ujian
-- **Endpoint:** `POST /exams/packages`
-- **Request Body:**
-```json
-{
-  "title": "Ujian Tengah Semester IPA",
-  "mapelId": "uuid-mapel"
-}
-```
-
-### Menambah Soal ke Paket
-- **Endpoint:** `POST /exams/questions`
-- **Request Body:**
-```json
-{
-  "paketUjianId": "uuid-paket",
-  "questionType": "PILGAN",
-  "questionText": "Apa ibukota Indonesia?",
-  "options": ["Jakarta", "Bandung", "Surabaya", "Medan"],
-  "correctAnswer": "Jakarta"
-}
-```
-
-### Daftar Paket Ujian Milik Guru
-- **Endpoint:** `GET /exams/my-packages`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": [ { "id": "uuid", "title": "UTS IPA", "mapel": { "name": "IPA" } } ]
-}
-```
-
-### Update Paket Ujian
-- **Endpoint:** `PUT /exams/packages/:id`
-- **Request Body:**
-```json
-{
-  "title": "Judul Baru"
-}
-```
-
-### Hapus Paket Ujian
-- **Endpoint:** `DELETE /exams/packages/:id`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "message": "Exam package deleted"
-}
-```
-
-### Daftar Bank Soal (Global/Shared)
-- **Endpoint:** `GET /exams/bank-soal`
-```json
-{
-  "status": "success",
-  "data": [ { "id": "uuid", "questionText": "...", "type": "PILGAN" } ]
-}
-```
-
-### Melakukan Penjadwalan Ujian (Schedule)
-- **Endpoint:** `POST /exams/schedule`
-- **Request Body:**
-```json
-{
-  "paketUjianId": "uuid-paket",
-  "rombelId": "uuid-rombel",
-  "startTime": "2026-04-03T08:00:00.000Z",
-  "endTime": "2026-04-03T10:00:00.000Z"
-}
-```
-
-### Daftar Jadwal Ujian Milik Guru
-- **Endpoint:** `GET /exams/my-schedules`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": [ { "id": "uuid", "examPackage": { "title": "..." }, "rombel": { "name": "..." } } ]
-}
-```
-
-### Daftar Siswa (Guru)
-- **Endpoint:** `GET /teacher/students`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": [ { "id": "uuid", "name": "Budi", "rombel": "Kelas 6A" } ]
-}
-```
-
-### Rekap Hasil Ujian (Dashboard Guru)
-- **Endpoint:** `GET /teacher/exam-results`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": [ { "scheduleId": "uuid", "examTitle": "UTS", "completedCount": 30, "rombel": "..." } ]
-}
-```
-
-### Detail Pengerjaan Siswa (Untuk Grading)
-- **Endpoint:** `GET /teacher/submissions/:hasilUjianId`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": { 
-     "studentName": "...", 
-     "answers": [ { "soalId": "...", "answer": "...", "type": "URAIAN" } ] 
+  ```
+- **Response Error (401 Unauthorized):**
+  ```json
+  {
+    "status": "error",
+    "message": "Not authenticated"
   }
-}
-```
-
-### Memberikan Nilai Manual (Soal Uraian)
-- **Endpoint:** `PATCH /teacher/submissions/:hasilUjianId/grade`
-- **Request Body:**
-```json
-{
-  "uraianGrades": [
-    {
-      "soalId": "uuid-soal",
-      "teacherScore": 85,
-      "feedback": "Jawaban sangat bagus dan runut"
-    }
-  ]
-}
-```
+  ```
 
 ---
 
-## 4. Siswa (Student) - Pengerjaan Ujian
+## 2. ADMINISTRATOR (Role: ADMIN)
 
-### Mendapatkan Daftar Ujian Tersedia
-- **Endpoint:** `GET /student/exams`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": [
-    {
-      "id": "uuid-schedule",
-      "title": "UTS IPA",
-      "startTime": "2026-04-03T08:00:00Z",
-      "endTime": "2026-04-03T10:00:00Z"
+### 2.1 Buat User Baru (Admin/Guru/Siswa)
+- **Method:** `POST`
+- **Endpoint:** `/admin/users`
+- **Akses:** ADMIN
+- **Request Body (JSON):**
+  ```json
+  {
+    "username": "siswa_akbar",
+    "name": "Akbar Ramadhan",
+    "role": "SISWA", // atau GURU, ADMIN
+    "jabatan": "Siswa Kelas 6A", // Opsional
+    "rombelId": "uuid-rombel" // Wajib untuk role SISWA
+  }
+  ```
+- **Response Sukses (201 Created):**
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "user": {
+        "id": "uuid",
+        "username": "siswa_akbar",
+        "name": "Akbar Ramadhan",
+        "role": "SISWA"
+      },
+      "defaultPassword": "X7Y8Z" // Password di-generate otomatis
     }
-  ]
-}
-```
+  }
+  ```
+- **Response Error (400 Bad Request):**
+  ```json
+  {
+    "status": "error",
+    "message": "Username already exists"
+  }
+  ```
 
-### Memulai Ujian
-- **Endpoint:** `POST /student/exams/:scheduleId/start`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": {
-    "session": { "id": "uuid", "status": "ONGOING", "startTime": "..." },
-    "questions": [
-      { "id": "uuid-1", "questionText": "Soal 1", "options": ["A", "B", "C", "D"], "type": "PILGAN" },
-      { "id": "uuid-2", "questionText": "Soal 2", "type": "URAIAN" }
+### 2.2 Lihat Daftar User
+- **Method:** `GET`
+- **Endpoint:** `/admin/users`
+- **Akses:** ADMIN
+- **Query Params (Opsional):** `?role=GURU&search=Budi`
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "id": "uuid",
+        "username": "budi_guru",
+        "name": "Budi Santoso",
+        "role": "GURU",
+        "rombel": null
+      }
     ]
   }
-}
-```
+  ```
 
-### Mengumpulkan Jawaban (Submit)
-- **Endpoint:** `POST /student/exams/:scheduleId/submit`
-- **Request Body:**
-```json
-{
-  "answers": [
-    { "soalId": "uuid-1", "answer": "Jakarta" },
-    { "soalId": "uuid-2", "answer": "Jawaban panjang siswa untuk uraian..." }
-  ]
-}
-```
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "message": "Exam submitted successfully",
-  "score": 80
-}
-```
-
----
-
-### Lihat Riwayat Hasil Ujian
-- **Endpoint:** `GET /student/results`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": [ { "id": "uuid", "examTitle": "IPA", "score": 85, "submittedAt": "..." } ]
-}
-```
-
-### Detail Hasil Ujian
-- **Endpoint:** `GET /student/results/:hasilUjianId`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": { "examTitle": "IPA", "answers": [ { "soal": "...", "score": 10 } ] }
-}
-```
+### 2.3 Update Profil Admin
+- **Method:** `PATCH`
+- **Endpoint:** `/admin/profile`
+- **Akses:** ADMIN
+- **Request Body (JSON):**
+  ```json
+  {
+    "name": "Admin Utama",
+    "password": "PasswordBaru123" // Opsional
+  }
+  ```
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "id": "uuid",
+      "name": "Admin Utama",
+      "username": "admin"
+    }
+  }
+  ```
 
 ---
 
-## 5. Laporan (Reports)
+## 3. GURU (Role: GURU)
 
-### Laporan Nilai Kelas (JSON)
-- **Endpoint:** `GET /reports/exams/:scheduleId`
-- **Response Sukses (200):**
-```json
-{
-  "status": "success",
-  "data": {
-    "examTitle": "Ulangan Harian",
-    "results": [
-      { "studentName": "Budi", "autoScore": 80, "uraianTotalPoints": 15, "status": "COMPLETED" }
+### 3.1 Profil Guru
+- **Method:** `PATCH`
+- **Endpoint:** `/teacher/profile`
+- **Akses:** GURU
+- **Request Body (JSON):**
+  ```json
+  {
+    "name": "Guru Budi Update",
+    "password": "PasswordBaru123" // Opsional
+  }
+  ```
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": { "id": "uuid", "name": "Guru Budi Update" } }
+  ```
+
+### 3.2 Daftar Siswa
+- **Method:** `GET`
+- **Endpoint:** `/teacher/students`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": [
+      { "id": "uuid", "name": "Andi", "rombel": { "name": "Kelas 6A" } }
     ]
   }
-}
-```
+  ```
+
+### 3.3 Dashboard Hasil Ujian (Rekap)
+- **Method:** `GET`
+- **Endpoint:** `/teacher/exam-results`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "scheduleId": "uuid",
+        "examTitle": "UTS IPA",
+        "rombel": "Kelas 6A",
+        "completedCount": 25,
+        "needsGradingCount": 5
+      }
+    ]
+  }
+  ```
+
+### 3.4 Detail Pengerjaan Siswa (Untuk Grading)
+- **Method:** `GET`
+- **Endpoint:** `/teacher/submissions/:hasilUjianId`
+- **Akses:** GURU
+- **Path Params:** `hasilUjianId` (UUID)
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "studentName": "Andi",
+      "examTitle": "UTS IPA",
+      "answers": [
+        {
+          "soalId": "uuid",
+          "questionText": "Jelaskan...",
+          "type": "URAIAN",
+          "studentAnswer": "Karena...",
+          "score": null
+        }
+      ]
+    }
+  }
+  ```
+- **Response Error (404 Not Found):**
+  ```json
+  { "status": "error", "message": "Submission not found" }
+  ```
+
+### 3.5 Memberikan Nilai Manual (Grading)
+- **Method:** `PATCH`
+- **Endpoint:** `/teacher/submissions/:hasilUjianId/grade`
+- **Akses:** GURU
+- **Path Params:** `hasilUjianId` (UUID)
+- **Request Body (JSON):**
+  ```json
+  {
+    "uraianGrades": [
+      {
+        "soalId": "uuid-soal",
+        "teacherScore": 85,
+        "feedback": "Bagus"
+      }
+    ]
+  }
+  ```
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "message": "Grading updated successfully" }
+  ```
 
 ---
 
-## Format Error Umum
+## 4. MODUL PEMBELAJARAN (Module)
 
-### 400 Bad Request (Validasi Gagal)
+### 4.1 Upload Modul
+- **Method:** `POST`
+- **Endpoint:** `/modules`
+- **Akses:** GURU
+- **Request Body (`multipart/form-data`):**
+  - `title` (text): "Bab 1 IPA"
+  - `rombelId` (text): "uuid"
+  - `pdf` (file): [File PDF]
+- **Response Sukses (201 Created):**
+  ```json
+  {
+    "status": "success",
+    "data": { "id": "uuid", "title": "Bab 1 IPA", "pdfPath": "/uploads/xxx.pdf" }
+  }
+  ```
+- **Response Error (400 Bad Request):**
+  ```json
+  { "status": "error", "message": "PDF file is required" }
+  ```
+
+### 4.2 Update Modul
+- **Method:** `PUT`
+- **Endpoint:** `/modules/:id`
+- **Akses:** GURU
+- **Path Params:** `id` (UUID Modul)
+- **Request Body (`multipart/form-data`):**
+  - `title` (text): "Bab 1 IPA (Revisi)"
+  - `rombelId` (text): "uuid"
+  - `pdf` (file): [File PDF Baru - Opsional]
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": { "id": "uuid", "title": "Bab 1 IPA (Revisi)" } }
+  ```
+
+### 4.3 Hapus Modul
+- **Method:** `DELETE`
+- **Endpoint:** `/modules/:id`
+- **Akses:** GURU
+- **Path Params:** `id` (UUID Modul)
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "message": "Module deleted successfully" }
+  ```
+
+### 4.4 Daftar Modul Guru
+- **Method:** `GET`
+- **Endpoint:** `/modules/my`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": [ { "id": "uuid", "title": "Bab 1 IPA" } ] }
+  ```
+
+---
+
+## 5. MANAJEMEN UJIAN (Exams)
+
+### 5.1 Buat Paket Ujian
+- **Method:** `POST`
+- **Endpoint:** `/exams/packages`
+- **Akses:** GURU
+- **Request Body (JSON):**
+  ```json
+  { "title": "UTS IPA", "mapelId": "uuid-mapel" }
+  ```
+- **Response Sukses (201 Created):**
+  ```json
+  { "status": "success", "data": { "id": "uuid", "title": "UTS IPA" } }
+  ```
+
+### 5.2 Lihat Daftar Paket Ujian
+- **Method:** `GET`
+- **Endpoint:** `/exams/my-packages`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": [ { "id": "uuid", "title": "UTS IPA" } ] }
+  ```
+
+### 5.3 Edit Paket Ujian
+- **Method:** `PUT`
+- **Endpoint:** `/exams/packages/:id`
+- **Akses:** GURU
+- **Request Body (JSON):**
+  ```json
+  { "title": "UTS IPA (Revisi)", "mapelId": "uuid-mapel" }
+  ```
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": { "id": "uuid", "title": "UTS IPA (Revisi)" } }
+  ```
+
+### 5.4 Hapus Paket Ujian
+- **Method:** `DELETE`
+- **Endpoint:** `/exams/packages/:id`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "message": "Exam package deleted" }
+  ```
+
+---
+
+## 6. MANAJEMEN SOAL (Questions)
+
+### 6.1 Tambah Soal
+- **Method:** `POST`
+- **Endpoint:** `/exams/questions`
+- **Akses:** GURU
+- **Request Body (JSON):**
+  *Untuk Pilihan Ganda:*
+  ```json
+  {
+    "paketUjianId": "uuid",
+    "questionType": "PILGAN",
+    "questionText": "Ibukota Indonesia adalah?",
+    "options": ["Jakarta", "Bandung", "Medan", "Surabaya"],
+    "correctAnswer": "Jakarta"
+  }
+  ```
+  *Untuk Uraian:*
+  ```json
+  {
+    "paketUjianId": "uuid",
+    "questionType": "URAIAN",
+    "questionText": "Jelaskan proses fotosintesis!"
+  }
+  ```
+- **Response Sukses (201 Created):**
+  ```json
+  { "status": "success", "data": { "id": "uuid", "questionText": "...", "type": "PILGAN" } }
+  ```
+
+### 6.2 Lihat Bank Soal
+- **Method:** `GET`
+- **Endpoint:** `/exams/bank-soal`
+- **Akses:** GURU
+- **Query Params:** `?paketUjianId=uuid`
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": [ { "id": "uuid", "questionText": "..." } ] }
+  ```
+
+### 6.3 Update Soal
+- **Method:** `PUT`
+- **Endpoint:** `/exams/questions/:id`
+- **Akses:** GURU
+- **Request Body (JSON):** (Sama seperti Tambah Soal)
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": { "id": "uuid", "questionText": "Updated..." } }
+  ```
+
+### 6.4 Hapus Soal
+- **Method:** `DELETE`
+- **Endpoint:** `/exams/questions/:id`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "message": "Question deleted" }
+  ```
+
+---
+
+## 7. PENJADWALAN UJIAN (Scheduling)
+
+### 7.1 Buat Jadwal Ujian
+- **Method:** `POST`
+- **Endpoint:** `/exams/schedule`
+- **Akses:** GURU
+- **Request Body (JSON):**
+  ```json
+  {
+    "paketUjianId": "uuid-paket",
+    "rombelId": "uuid-rombel",
+    "startTime": "2026-04-03T08:00:00.000Z",
+    "endTime": "2026-04-03T10:00:00.000Z"
+  }
+  ```
+- **Response Sukses (201 Created):**
+  ```json
+  { "status": "success", "data": { "id": "uuid", "startTime": "..." } }
+  ```
+
+### 7.2 Lihat Daftar Jadwal
+- **Method:** `GET`
+- **Endpoint:** `/exams/my-schedules`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": [ { "id": "uuid", "paketUjian": "UTS", "rombel": "6A" } ] }
+  ```
+
+### 7.3 Update Jadwal
+- **Method:** `PUT`
+- **Endpoint:** `/exams/schedule/:id`
+- **Akses:** GURU
+- **Request Body (JSON):**
+  ```json
+  {
+    "startTime": "2026-04-04T08:00:00.000Z",
+    "endTime": "2026-04-04T10:00:00.000Z"
+  }
+  ```
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": { "id": "uuid" } }
+  ```
+
+### 7.4 Hapus Jadwal
+- **Method:** `DELETE`
+- **Endpoint:** `/exams/schedule/:id`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "message": "Schedule deleted" }
+  ```
+
+---
+
+## 8. SISWA (Role: SISWA)
+
+### 8.1 Profil Siswa
+- **Method:** `PATCH`
+- **Endpoint:** `/student/profile`
+- **Akses:** SISWA
+- **Request Body (JSON):**
+  ```json
+  { "name": "Akbar Ramadhan", "password": "PasswordBaru123" }
+  ```
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": { "id": "uuid", "name": "Akbar Ramadhan" } }
+  ```
+
+### 8.2 Ambil Daftar Modul
+- **Method:** `GET`
+- **Endpoint:** `/student/modules`
+- **Akses:** SISWA
+- **Response Sukses (200 OK):**
+  ```json
+  { "status": "success", "data": [ { "id": "uuid", "title": "Modul IPA", "pdfPath": "..." } ] }
+  ```
+
+### 8.3 Ambil Daftar Ujian (Jadwal)
+- **Method:** `GET`
+- **Endpoint:** `/student/exams`
+- **Akses:** SISWA
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "id": "uuid-schedule",
+        "title": "UTS IPA",
+        "startTime": "...",
+        "endTime": "..."
+      }
+    ]
+  }
+  ```
+
+### 8.4 Mulai Ujian
+- **Method:** `POST`
+- **Endpoint:** `/student/exams/:scheduleId/start`
+- **Akses:** SISWA
+- **Path Params:** `scheduleId` (UUID)
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "session": { "id": "uuid", "status": "ONGOING", "startTime": "..." },
+      "questions": [
+        {
+          "id": "uuid-soal-1",
+          "questionText": "Ibukota Indonesia adalah?",
+          "type": "PILGAN",
+          "options": ["Jakarta", "Bandung", "Surabaya", "Medan"]
+        },
+        {
+          "id": "uuid-soal-2",
+          "questionText": "Jelaskan...",
+          "type": "URAIAN"
+        }
+      ]
+    }
+  }
+  ```
+- **Response Error (400 Bad Request - Belum waktunya / Sudah dikerjakan):**
+  ```json
+  { "status": "error", "message": "Exam not available at this time or already submitted" }
+  ```
+
+### 8.5 Kumpulkan Jawaban Ujian
+- **Method:** `POST`
+- **Endpoint:** `/student/exams/:scheduleId/submit`
+- **Akses:** SISWA
+- **Path Params:** `scheduleId` (UUID)
+- **Request Body (JSON):**
+  ```json
+  {
+    "answers": [
+      { "soalId": "uuid-soal-1", "answer": "Jakarta" },
+      { "soalId": "uuid-soal-2", "answer": "Ini adalah jawaban panjang uraian..." }
+    ]
+  }
+  ```
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "message": "Exam submitted successfully",
+    "score": 80 // (Bisa null jika masih butuh grading uraian)
+  }
+  ```
+
+### 8.6 Riwayat Ujian Siswa
+- **Method:** `GET`
+- **Endpoint:** `/student/results`
+- **Akses:** SISWA
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": [ { "id": "uuid", "examTitle": "UTS IPA", "score": 85, "submittedAt": "..." } ]
+  }
+  ```
+
+### 8.7 Detail Jawaban Ujian Siswa
+- **Method:** `GET`
+- **Endpoint:** `/student/results/:hasilUjianId`
+- **Akses:** SISWA
+- **Path Params:** `hasilUjianId` (UUID)
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "examTitle": "UTS IPA",
+      "score": 85,
+      "answers": [
+        { "questionText": "...", "studentAnswer": "...", "isCorrect": true, "score": 10 }
+      ]
+    }
+  }
+  ```
+
+---
+
+## 9. REPORTS (Laporan)
+
+### 9.1 Laporan Nilai Kelas
+- **Method:** `GET`
+- **Endpoint:** `/reports/exams/:scheduleId`
+- **Akses:** ADMIN, GURU
+- **Path Params:** `scheduleId` (UUID)
+- **Response Sukses (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "examTitle": "UTS IPA",
+      "subject": "IPA",
+      "rombel": "Kelas 6A",
+      "results": [
+        {
+          "studentName": "Andi",
+          "username": "siswa_andi",
+          "autoScore": 75,
+          "uraianTotalPoints": 15,
+          "status": "COMPLETED",
+          "submittedAt": "..."
+        }
+      ]
+    }
+  }
+  ```
+- **Response Error (404 Not Found):**
+  ```json
+  { "status": "error", "message": "Schedule not found" }
+  ```
+
+---
+
+## CONTOH PENANGANAN HTTP ERROR UMUM
+
+Berikut adalah standar response error jika terjadi kegagalan sistem atau akses tidak valid yang berlaku bagi SEMUA ENDPOINT:
+
+### 400 Bad Request (Validasi Input Gagal)
+Terjadi jika request body/parameter kosong, salah tipe, atau aturan validasi dilanggar.
 ```json
 {
   "status": "error",
@@ -369,27 +670,39 @@ Dokumen ini berisi daftar endpoint API, format request, serta contoh response (s
 }
 ```
 
-### 403 Forbidden (Tidak Punya Akses)
+### 401 Unauthorized (Token Kosong atau Tidak Valid)
+Muncul pada endpoint terproteksi jika Header `Authorization: Bearer <token>` tidak dilengkapi, salah, atau token sudah kadaluwarsa.
 ```json
 {
   "status": "error",
-  "message": "Forbidden: You do not have access to this resource"
+  "message": "Not authenticated. Token is missing or invalid."
 }
 ```
 
-### 404 Not Found
+### 403 Forbidden (Peran/Role Tidak Sesuai Akses)
+Muncul jika user login berstatus Siswa mencoba memanggil endpoint yang khusus untuk peran Guru/Admin, dll.
 ```json
 {
   "status": "error",
-  "message": "Route not found"
+  "message": "Forbidden: You don't have enough permission"
 }
 ```
 
-### 500 Internal Server Error
+### 404 Not Found (Data / Route Tidak Ditemukan)
+Muncul jika query database tidak menemukan data (misal: ID tidak valid) atau endpoint URL yang dipanggil API tidak tersedia.
+```json
+{
+  "status": "error",
+  "message": "Route not found" 
+}
+```
+
+### 500 Internal Server Error (Kegagalan Server Backend)
+Muncul saat runtime node.js error atau komunikasi database ke MySQL terputus. Pada environment development `NODE_ENV=development`, error ini akan menampilkan `stack trace` yang lengkap. Dalam production, `stack trace` akan disembunyikan.
 ```json
 {
   "status": "error",
   "message": "Internal Server Error",
-  "stack": "..." (hanya muncul di environment development)
+  "stack": "Error: Table 'cbt_sd_db.users' doesn't exist at..." 
 }
 ```
