@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, getAllUsers, updateAdminProfile } from '../controllers/adminController.js';
+import { createUser, getAllUsers, updateAdminProfile, deleteUser, changeUserPassword } from '../controllers/adminController.js';
 import { authenticate, isAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -11,10 +11,10 @@ router.use(isAdmin);
 // Admin profile management
 router.patch('/profile', updateAdminProfile);
 
-// Admin-only: Create user (Admin/Guru/Siswa)
+// Admin-only: User control
 router.post('/users', createUser);
-
-// Admin-only: List all users
 router.get('/users', getAllUsers);
+router.delete('/users/:id', deleteUser);
+router.patch('/users/:id/password', changeUserPassword);
 
 export default router;

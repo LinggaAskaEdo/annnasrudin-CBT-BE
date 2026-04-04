@@ -51,8 +51,9 @@ components:
         id:
           type: string
           format: uuid
-        username:
+        password:
           type: string
+          description: Hashed password (visible to ADMIN only in lists)
         name:
           type: string
         role:
@@ -158,7 +159,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
     get:
-      summary: Daftar semua user
+      summary: Daftar semua user (Admin bisa melihat password)
       tags: [Admin]
       parameters:
         - in: query
@@ -174,7 +175,93 @@ paths:
             application/json:
               example:
                 status: success
-                data: [ { id: "uuid", username: "guru1", role: "GURU" } ]
+                data: [ { id: "uuid", username: "guru1", password: "...", role: "GURU" } ]
+  
+  /admin/users/{id}:
+    delete:
+      summary: Hapus User
+      tags: [Admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User dihapus
+          content:
+            application/json:
+              example: { status: "success", message: "User berhasil dihapus" }
+
+  /admin/users/{id}/password:
+    patch:
+      summary: Ubah Password User
+      tags: [Admin]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              properties:
+                newPassword: { type: string, example: "adminbaru123" }
+      responses:
+        '200':
+          description: Password diubah
+          content:
+            application/json:
+              example: { status: "success", message: "Password user berhasil diubah" }
+
+  /guru/siswa:
+    post:
+      summary: Guru membuat User Siswa baru
+      tags: [Guru]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, name]
+              properties:
+                username: { type: string, example: "siswa_baru" }
+                name: { type: string, example: "Siswa Baru" }
+                role: { type: string, example: "SISWA" }
+                rombelId: { type: string, format: uuid }
+      responses:
+        '201':
+          description: Siswa dibuat
+          content:
+            application/json:
+              example:
+                status: success
+                data: { user: { id: "uuid", username: "siswa_baru" }, defaultPassword: "..." }
+        '403':
+          description: Forbidden (Hanya bisa role SISWA)
+
+  /guru/siswa/{id}:
+    delete:
+      summary: Guru menghapus User Siswa
+      tags: [Guru]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Siswa dihapus
+          content:
+            application/json:
+              example: { status: "success", message: "User berhasil dihapus" }
+        '403':
+          description: Forbidden (Bukan role SISWA)
 
   /guru/profile:
     patch:

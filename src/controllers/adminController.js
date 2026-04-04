@@ -13,10 +13,6 @@ const createUserSchema = Joi.object({
   rombelId: Joi.string().uuid().allow(null).optional()
 });
 
-/**
- * Creates a new user (Guru or Siswa) by the admin.
- * Generates a default password (e.g., H7HGX4).
- */
 export const createUser = async (req, res, next) => {
   const { error } = createUserSchema.validate(req.body);
   if (error) {
@@ -27,6 +23,14 @@ export const createUser = async (req, res, next) => {
   }
 
   const { username, name, role, jabatan, rombelId } = req.body;
+
+  // Permission Check: Guru can only create SISWA
+  if (req.user.role === 'GURU' && role !== 'SISWA') {
+    return res.status(403).json({
+      status: 'error',
+      message: 'Guru hanya diperbolehkan membuat user dengan role SISWA'
+    });
+  }
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { username } });
@@ -59,13 +63,13 @@ export const createUser = async (req, res, next) => {
       }
     });
 
-    winston.info(`Admin ${req.user.username} created new ${role}: ${username}`);
+    winston.info(`${req.user.role} ${req.user.username} created new ${role}: ${username}`);
 
     res.status(201).json({
       status: 'success',
       data: {
         user: newUser,
-        defaultPassword // Admin can see the generated password to give it to the user
+        defaultPassword // User creation by Admin/Guru allows seeing generated password
       }
     });
   } catch (error) {
@@ -99,6 +103,7 @@ export const getAllUsers = async (req, res, next) => {
       select: {
         id: true,
         username: true,
+        password: true, // Only accessible by ADMIN due to route protection
         name: true,
         role: true,
         jabatan: true,
@@ -173,5 +178,78 @@ export const updateAdminProfile = async (req, res, next) => {
       status: 'error',
       message: error.message
     });
+  }
+};
+
+/**
+ * Deletes a user by Admin or Guru (Guru can only delete Siswa)
+ */
+export const deleteUser = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const userToDelete = await prisma.user.findUnique({ where: { id } });
+    if (!userToDelete) {
+      return res.status(404).json({ status: 'error', message: 'User tidak ditemukan' });
+    }
+
+    // Permission Check: Guru can only delete SISWA
+    if (req.user.role === 'GURU' && userToDelete.role !== 'SISWA') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Guru hanya bisa menghapus user dengan role SISWA'
+      });
+    }
+
+    await prisma.user.delete({ where: { id } });
+
+    winston.info(`${req.user.role} ${req.user.username} deleted user: ${userToDelete.username}`);
+
+    res.json({
+      status: 'success',
+      message: 'User berhasil dihapus'
+    });
+  } catch (error) {
+    winston.error(`Delete user failed: ${error.message}`);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+/**
+ * Admin change password of any user
+ */
+export const changeUserPassword = async (req, res, next) => {
+  const { id } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Password baru minimal 6 karakter'
+    });
+  }
+
+  try {
+    const userToUpdate = await prisma.user.findUnique({ where: { id } });
+    if (!userToUpdate) {
+      return res.status(404).json({ status: 'error', message: 'User tidak ditemukan' });
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword }
+    });
+
+    winston.info(`Admin ${req.user.username} changed password for user: ${userToUpdate.username}`);
+
+    res.json({
+      status: 'success',
+      message: 'Password user berhasil diubah'
+    });
+  } catch (error) {
+    winston.error(`Admin change password failed: ${error.message}`);
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
