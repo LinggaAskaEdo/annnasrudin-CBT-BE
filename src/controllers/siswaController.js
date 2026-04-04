@@ -1,13 +1,6 @@
-import { PrismaClient } from '@prisma/client';
-import { hashPassword } from '../utils/authUtils.js';
+import * as siswaService from '../services/siswaService.js';
 import winston from '../utils/logger.js';
-import Joi from 'joi';
 
-const prisma = new PrismaClient();
-
-/**
- * Siswa updates their password.
- */
 export const updateProfile = async (req, res, next) => {
   const { password } = req.body;
   if (!password) {
@@ -15,132 +8,52 @@ export const updateProfile = async (req, res, next) => {
   }
 
   try {
-    const hashedPassword = await hashPassword(password);
-    await prisma.user.update({
-      where: { id: req.user.id },
-      data: { password: hashedPassword }
-    });
+    await siswaService.updateProfile(req.user.id, password);
     res.json({ status: 'success', message: 'Password updated successfully' });
   } catch (error) {
+    winston.error(`Siswa profile update failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
-/**
- * Get modules assigned to the siswa's Rombel.
- */
 export const getAvailableModules = async (req, res, next) => {
   try {
-    const siswa = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { rombelId: true }
-    });
-
-    if (!siswa.rombelId) {
-      return res.json({ status: 'success', data: [] });
-    }
-
-    const modules = await prisma.modul.findMany({
-      where: { rombelId: siswa.rombelId },
-      include: { guru: { select: { name: true } } }
-    });
-
+    const modules = await siswaService.getAvailableModules(req.user.id);
     res.json({ status: 'success', data: modules });
   } catch (error) {
+    winston.error(`Fetching modules for siswa failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
-/**
- * Get available exam schedules with status filters.
- */
 export const getAvailableExams = async (req, res, next) => {
   try {
-    const siswa = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { rombelId: true }
-    });
-
-    if (!siswa.rombelId) {
-       return res.json({ status: 'success', data: [] });
-    }
-
-    const now = new Date();
-    const schedules = await prisma.jadwalUjian.findMany({
-      where: { rombelId: siswa.rombelId },
-      include: {
-        paketUjian: { select: { title: true, mapel: { select: { name: true } } } },
-        hasilUjians: { where: { siswaId: req.user.id } }
-      }
-    });
-
-    const exams = schedules.map(s => {
-      let status = 'UPCOMING';
-      if (s.hasilUjians.length > 0 && s.hasilUjians[0].status === 'COMPLETED') {
-        status = 'COMPLETED';
-      } else if (now > s.deadline) {
-        status = 'EXPIRED';
-      } else if (now >= s.startTime && now <= s.endTime) {
-        status = 'AVAILABLE';
-      }
-
-      return {
-        id: s.id,
-        title: s.paketUjian.title,
-        subject: s.paketUjian.mapel.name,
-        startTime: s.startTime,
-        endTime: s.endTime,
-        deadline: s.deadline,
-        status
-      };
-    });
-
+    const exams = await siswaService.getAvailableExams(req.user.id);
     res.json({ status: 'success', data: exams });
   } catch (error) {
+    winston.error(`Fetching exams for siswa failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
-/**
- * List history of results for the siswa.
- */
 export const getResults = async (req, res, next) => {
   try {
-    const results = await prisma.hasilUjian.findMany({
-      where: { siswaId: req.user.id },
-      include: {
-        jadwalUjian: {
-          include: { paketUjian: { select: { title: true, mapel: { select: { name: true } } } } }
-        }
-      }
-    });
-
+    const results = await siswaService.getResults(req.user.id);
     res.json({ status: 'success', data: results });
   } catch (error) {
+    winston.error(`Fetching results for siswa failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
-/**
- * Siswa views detailed results (including Uraian feedback).
- */
 export const getResultDetail = async (req, res, next) => {
   const { hasilUjianId } = req.params;
 
   try {
-    const result = await prisma.hasilUjian.findFirst({
-        where: { id: hasilUjianId, siswaId: req.user.id },
-        include: {
-            jadwalUjian: {
-                include: { paketUjian: { select: { title: true, mapel: { select: { name: true } } } } }
-            }
-        }
-    });
-
-    if (!result) return res.status(404).json({ status: 'error', message: 'Result not found' });
-
+    const result = await siswaService.getResultDetail(hasilUjianId, req.user.id);
     res.json({ status: 'success', data: result });
   } catch (error) {
+    winston.error(`Fetching result detail for siswa failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };

@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import * as userRepository from '../repositories/userRepository.js';
 import { comparePassword, generateToken } from '../utils/authUtils.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Handles user authentication
@@ -11,9 +9,7 @@ const prisma = new PrismaClient();
  * @returns {Promise<{user: object, token: string}>}
  */
 export const loginUser = async (username, password, sessionId) => {
-  const user = await prisma.user.findUnique({
-    where: { username }
-  });
+  const user = await userRepository.findByUsername(username);
 
   if (!user) {
     throw new Error('Invalid username or password');
@@ -28,10 +24,7 @@ export const loginUser = async (username, password, sessionId) => {
   }
 
   // Update user with new sessionId
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { currentSessionId: sessionId }
-  });
+  await userRepository.update(user.id, { currentSessionId: sessionId });
 
   // Generate JWT access token with sessionId
   const token = generateToken({
@@ -50,4 +43,12 @@ export const loginUser = async (username, password, sessionId) => {
     },
     token
   };
+};
+
+/**
+ * Handles user logout
+ * @param {string} userId
+ */
+export const logoutUser = async (userId) => {
+  await userRepository.update(userId, { currentSessionId: null });
 };

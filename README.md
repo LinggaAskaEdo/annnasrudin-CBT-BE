@@ -1,18 +1,31 @@
 # Sistem CBT SD (Computer Based Test)
 
-Sistem CBT SD adalah backend application berbasis Node.js yang ditujukan untuk mengelola ujian berbasis komputer (CBT) interaktif bagi siswa Sekolah Dasar. Sistem ini memiliki 3 pengguna (Role) utama, yaitu **Admin**, **Guru**, dan **Siswa**, dengan akses dan fungsi yang tersegregasi.
+Sistem CBT SD adalah backend application berbasis Node.js yang ditujukan
+untuk mengelola ujian berbasis komputer (CBT) interaktif bagi siswa
+Sekolah Dasar. Sistem ini memiliki 3 pengguna (Role) utama, yaitu **Admin**,
+**Guru**, dan **Siswa**, dengan akses dan fungsi yang tersegregasi.
 
 ## 🚀 Fitur Utama
 
-- **Role-Based Access Control (RBAC):** Autentikasi aman menggunakan JWT dengan batasan akses penuh per-role.
-- **Sistem Keamanan Sesi Ganda:** Mencegah satu user untuk login di banyak perangkat secara serentak. Jika login di perangkat baru, sesi lama akan otomatis keluar dengan pesan: `"Sedang login di perangkat lain"`.
-- **Penilaian Manual & Skor Independen:** Guru dapat menilai soal Uraian secara manual. Skor Pilihan Ganda (`scorePilgan`) dan Uraian (`scoreUraian`) dicatat secara terpisah sesuai jenis ujiannya.
+- **Role-Based Access Control (RBAC):** Autentikasi aman menggunakan JWT
+  dengan batasan akses penuh per-role.
+- **Sistem Keamanan Sesi Ganda:** Mencegah satu user untuk login di banyak
+  perangkat secara serentak. Jika login di perangkat baru, sesi lama akan
+  otomatis keluar dengan pesan: `"Sedang login di perangkat lain"`.
+- **Penilaian Manual & Skor Independen:** Guru dapat menilai soal Uraian
+  secara manual. Skor Pilihan Ganda (`scorePilgan`) dan Uraian (`scoreUraian`)
+  dicatat secara terpisah sesuai jenis ujiannya.
 - **Laporan Otomatis:** Output JSON format untuk rekapitulasi nilai kelas keseluruhan.
 - **API Documentation Terintegrasi:** Spesifikasi lengkap menggunakan Swagger UI.
+- **Laporan Otomatis:** Output JSON format untuk rekapitulasi nilai kelas
+  keseluruhan.
+- **API Documentation Terintegrasi:** Spesifikasi lengkap menggunakan
+  Swagger UI.
 
 ---
 
 ## 🛠️ Stack Teknologi Terapan
+
 - **Runtime:** Node.js LTS (ES Modules)
 - **Framework:** Express.js 5.x
 - **ORM:** Prisma v6
@@ -25,12 +38,14 @@ Sistem CBT SD adalah backend application berbasis Node.js yang ditujukan untuk m
 ## ⚙️ Petunjuk Pemasangan (Setup Guide)
 
 1. **Clone & Install**
+
    ```bash
    git clone <repo-url>
    npm install
    ```
 
 2. **Environment (.env)**
+
    ```env
    DATABASE_URL="mysql://root:pass@localhost:3306/cbt_db"
    PORT=3000
@@ -38,6 +53,7 @@ Sistem CBT SD adalah backend application berbasis Node.js yang ditujukan untuk m
    ```
 
 3. **Database Sync**
+
    ```bash
    npx prisma db push
    npx prisma generate
@@ -45,6 +61,7 @@ Sistem CBT SD adalah backend application berbasis Node.js yang ditujukan untuk m
    ```
 
 4. **Run**
+
    ```bash
    npm run dev
    ```
@@ -57,12 +74,14 @@ Seluruh request yang membutuhkan autentikasi harus menyertakan Header:
 `Authorization: Bearer <token>`
 
 ### 🔐 Autentikasi
+
 | Method | Endpoint | Role | Deskripsi |
 | :--- | :--- | :--- | :--- |
 | POST | `/api/auth/login` | Publik | Login & mendapatkan Token |
 | POST | `/api/auth/logout` | All | Logout & hapus sesi aktif |
 
 ### 👨‍💼 Admin (Manajemen User)
+
 | Method | Endpoint | Deskripsi |
 | :--- | :--- | :--- |
 | PATCH | `/api/admin/profile` | Update nama/password Admin sendiri |
@@ -70,6 +89,7 @@ Seluruh request yang membutuhkan autentikasi harus menyertakan Header:
 | GET | `/api/admin/users` | List semua user |
 
 ### 👨‍🏫 Guru (Materi & Ujian)
+
 | Method | Endpoint | Deskripsi |
 | :--- | :--- | :--- |
 | POST/PUT/DELETE | `/api/modules/` | Kelola Modul PDF (Upload ke `/uploads`) |
@@ -80,6 +100,7 @@ Seluruh request yang membutuhkan autentikasi harus menyertakan Header:
 | PATCH | `/api/guru/submissions/:id/grade` | Berikan nilai & feedback Uraian |
 
 ### 👶 Siswa (Pengerjaan Ujian)
+
 | Method | Endpoint | Deskripsi |
 | :--- | :--- | :--- |
 | GET | `/api/siswa/modules` | Lihat modul yang tersedia untuk Rombelnya |
@@ -89,18 +110,23 @@ Seluruh request yang membutuhkan autentikasi harus menyertakan Header:
 | GET | `/api/siswa/results` | Lihat riwayat dan detail nilai |
 
 ### 📊 Laporan
+
 | Method | Endpoint | Deskripsi |
 | :--- | :--- | :--- |
-| GET | `/api/reports/classroom/:scheduleId` | Download rekapitulasi nilai satu kelas (JSON) |
+| GET | `/api/reports/classroom/:scheduleId` | Rekapitulasi nilai satu kelas |
 
 ---
 
 ## 👥 Alur Penggunaan (User Workflow) Dasar
 
 1. **Admin** mendaftarkan Guru & Siswa, serta memberikan _Password Default_.
-2. **Guru** login, mengunggah materi belajar, menyusun soal, dan menentukan jadwal ujian.
-3. **Siswa** mengerjakan ujian sesuai jadwal. Sistem otomatis mengoreksi Pilihan Ganda.
+2. **Guru** login, mengunggah materi belajar, menyusun soal, dan menentukan
+   jadwal ujian.
+3. **Siswa** mengerjakan ujian sesuai jadwal. Sistem otomatis mengoreksi
+   Pilihan Ganda.
 4. **Guru** masuk ke menu grading untuk mengoreksi Soal Uraian secara manual.
-5. **Skor Independen**: Nilai Pilihan Ganda dan Nilai Uraian tersimpan secara terpisah dan dapat dipantau oleh Siswa maupun Guru/Admin via Laporan.
+5. **Skor Independen**: Nilai Pilihan Ganda dan Nilai Uraian tersimpan
+   secara terpisah dan dapat dipantau oleh Siswa maupun Guru/Admin via
+   Laporan.
 
 **Swagger Docs:** `http://localhost:3000/api-docs`
