@@ -10,8 +10,7 @@ export const scheduleExam = async (req, res, next) => {
       data: newSchedule
     });
   } catch (error) {
-    winston.error(`Exam scheduling failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -20,7 +19,7 @@ export const getMySchedules = async (req, res, next) => {
     const schedules = await scheduleService.getMySchedules(req.user);
     res.json({ status: 'success', data: schedules });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -31,7 +30,7 @@ export const updateSchedule = async (req, res, next) => {
     const updated = await scheduleService.updateSchedule(id, req.body, req.user);
     res.json({ status: 'success', data: updated });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -42,6 +41,6 @@ export const deleteSchedule = async (req, res, next) => {
     await scheduleService.deleteSchedule(id, req.user);
     res.json({ status: 'success', message: 'Schedule deleted successfully' });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };

@@ -18,8 +18,7 @@ export const createModule = async (req, res, next) => {
       data: newModul
     });
   } catch (error) {
-    winston.error(`Module upload failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -35,8 +34,7 @@ export const updateModule = async (req, res, next) => {
       data: updated
     });
   } catch (error) {
-    winston.error(`Module update failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -48,8 +46,7 @@ export const getMyModules = async (req, res, next) => {
       data: modules
     });
   } catch (error) {
-    winston.error(`Fetching my modules failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -61,8 +58,7 @@ export const getModulesByRombel = async (req, res, next) => {
       data: modules
     });
   } catch (error) {
-    winston.error(`Fetching modules by rombel failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -77,7 +73,6 @@ export const deleteModule = async (req, res, next) => {
       message: 'Module deleted successfully'
     });
   } catch (error) {
-    winston.error(`Delete module failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };

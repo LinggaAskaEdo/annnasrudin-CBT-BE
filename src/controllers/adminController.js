@@ -33,11 +33,7 @@ export const createUser = async (req, res, next) => {
       }
     });
   } catch (error) {
-    winston.error(`User creation failed: ${error.message}`);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    next(error);
   }
 };
 
@@ -49,11 +45,7 @@ export const getAllUsers = async (req, res, next) => {
       data: users
     });
   } catch (error) {
-    winston.error(`Fetching users failed: ${error.message}`);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    next(error);
   }
 };
 
@@ -79,11 +71,7 @@ export const updateAdminProfile = async (req, res, next) => {
       data: updatedUser
     });
   } catch (error) {
-    winston.error(`Admin profile update failed: ${error.message}`);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    next(error);
   }
 };
 
@@ -91,15 +79,13 @@ export const deleteUser = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const userToDelete = await userService.deleteUser(id, req.user);
     winston.info(`${req.user.role} ${req.user.username} deleted user: ${id}`);
     res.json({
       status: 'success',
       message: 'User berhasil dihapus'
     });
   } catch (error) {
-    winston.error(`Delete user failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -115,15 +101,13 @@ export const changeUserPassword = async (req, res, next) => {
   }
 
   try {
-    const userToUpdate = await userService.changePassword(id, newPassword, req.user);
     winston.info(`Admin ${req.user.username} changed password for user: ${id}`);
     res.json({
       status: 'success',
       message: 'Password user berhasil diubah'
     });
   } catch (error) {
-    winston.error(`Admin change password failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -147,8 +131,7 @@ export const createRombel = async (req, res, next) => {
       data: newRombel
     });
   } catch (error) {
-    winston.error(`Create rombel failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -157,7 +140,6 @@ export const getAllRombels = async (req, res, next) => {
     const rombels = await rombelService.getAllRombels();
     res.json({ status: 'success', data: rombels });
   } catch (error) {
-    winston.error(`Fetching rombels failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };

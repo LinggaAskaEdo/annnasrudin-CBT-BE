@@ -26,11 +26,7 @@ export const updateProfile = async (req, res, next) => {
       data: updatedUser
     });
   } catch (error) {
-    winston.error(`Profile update failed: ${error.message}`);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    next(error);
   }
 };
 
@@ -42,11 +38,7 @@ export const getSiswa = async (req, res, next) => {
       data: siswa
     });
   } catch (error) {
-    winston.error(`Fetching siswa failed: ${error.message}`);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    next(error);
   }
 };
 
@@ -57,8 +49,7 @@ export const getSubmissionDetail = async (req, res, next) => {
     const submission = await guruService.getSubmissionDetail(hasilUjianId);
     res.json({ status: 'success', data: submission });
   } catch (error) {
-    winston.error(`Fetching submission detail failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -76,8 +67,7 @@ export const gradeUraian = async (req, res, next) => {
       data: updated
     });
   } catch (error) {
-    winston.error(`Grading failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -89,10 +79,6 @@ export const getExamResults = async (req, res, next) => {
       data: results
     });
   } catch (error) {
-    winston.error(`Fetching results failed: ${error.message}`);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    next(error);
   }
 };

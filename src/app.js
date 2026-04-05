@@ -10,7 +10,7 @@ import moduleRoutes from './routes/moduleRoutes.js';
 import examRoutes from './routes/examRoutes.js';
 import siswaRoutes from './routes/siswaRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
-import path from 'path';
+import path from 'node:path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 // Global Error Handler
 app.use((err, req, res, next) => {
   winston.error(err.stack);
-  
+
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     status: 'error',
