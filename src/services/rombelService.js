@@ -1,14 +1,20 @@
-import * as rombelRepository from '../repositories/rombelRepository.js';
-
-export const createRombel = async (name) => {
-  const existing = await rombelRepository.findByName(name);
-  if (existing) {
-    throw new Error('Nama rombel sudah ada');
+class RombelService {
+  constructor(rombelRepository) {
+    this.rombelRepository = rombelRepository;
   }
 
-  return await rombelRepository.create({ name });
-};
+  createRombel = async (name) => {
+    const existing = await this.rombelRepository.findByName(name);
+    if (existing) {
+      throw new Error('Nama rombel sudah ada');
+    }
 
-export const getAllRombels = async () => {
-  return await rombelRepository.findAll();
-};
+    return await this.rombelRepository.create({ name });
+  };
+
+  getAllRombels = async () => {
+    return await this.rombelRepository.findAll();
+  };
+}
+
+export default RombelService;

@@ -1,46 +1,52 @@
-import * as jadwalUjianRepository from '../repositories/jadwalUjianRepository.js';
-import * as paketUjianRepository from '../repositories/paketUjianRepository.js';
-
-export const createSchedule = async (scheduleData, currentUser) => {
-  const { paketUjianId } = scheduleData;
-  const paketUjian = await paketUjianRepository.findById(paketUjianId);
-  if (!paketUjian || paketUjian.guruId !== currentUser.id) {
-    throw new Error('Forbidden');
+class ScheduleService {
+  constructor(jadwalUjianRepository, paketUjianRepository) {
+    this.jadwalUjianRepository = jadwalUjianRepository;
+    this.paketUjianRepository = paketUjianRepository;
   }
 
-  return await jadwalUjianRepository.create({
-    ...scheduleData,
-    startTime: new Date(scheduleData.startTime),
-    endTime: new Date(scheduleData.endTime),
-    deadline: new Date(scheduleData.deadline)
-  });
-};
+  createSchedule = async (scheduleData, currentUser) => {
+    const { paketUjianId } = scheduleData;
+    const paketUjian = await this.paketUjianRepository.findById(paketUjianId);
+    if (!paketUjian || paketUjian.guruId !== currentUser.id) {
+      throw new Error('Forbidden');
+    }
 
-export const getMySchedules = async (currentUser) => {
-  return await jadwalUjianRepository.findAll({ paketUjian: { guruId: currentUser.id } });
-};
-
-export const updateSchedule = async (id, scheduleData, currentUser) => {
-  const existing = await jadwalUjianRepository.findById(id);
-  if (!existing || existing.paketUjian.guruId !== currentUser.id) {
-    throw new Error('Forbidden');
-  }
-
-  const data = {
-    ...scheduleData,
-    startTime: scheduleData.startTime ? new Date(scheduleData.startTime) : undefined,
-    endTime: scheduleData.endTime ? new Date(scheduleData.endTime) : undefined,
-    deadline: scheduleData.deadline ? new Date(scheduleData.deadline) : undefined
+    return await this.jadwalUjianRepository.create({
+      ...scheduleData,
+      startTime: new Date(scheduleData.startTime),
+      endTime: new Date(scheduleData.endTime),
+      deadline: new Date(scheduleData.deadline)
+    });
   };
 
-  return await jadwalUjianRepository.update(id, data);
-};
+  getMySchedules = async (currentUser) => {
+    return await this.jadwalUjianRepository.findAll({ paketUjian: { guruId: currentUser.id } });
+  };
 
-export const deleteSchedule = async (id, currentUser) => {
-  const existing = await jadwalUjianRepository.findById(id);
-  if (!existing || existing.paketUjian.guruId !== currentUser.id) {
-    throw new Error('Forbidden');
-  }
+  updateSchedule = async (id, scheduleData, currentUser) => {
+    const existing = await this.jadwalUjianRepository.findById(id);
+    if (!existing || existing.paketUjian.guruId !== currentUser.id) {
+      throw new Error('Forbidden');
+    }
 
-  return await jadwalUjianRepository.deleteJadwal(id);
-};
+    const data = {
+      ...scheduleData,
+      startTime: scheduleData.startTime ? new Date(scheduleData.startTime) : undefined,
+      endTime: scheduleData.endTime ? new Date(scheduleData.endTime) : undefined,
+      deadline: scheduleData.deadline ? new Date(scheduleData.deadline) : undefined
+    };
+
+    return await this.jadwalUjianRepository.update(id, data);
+  };
+
+  deleteSchedule = async (id, currentUser) => {
+    const existing = await this.jadwalUjianRepository.findById(id);
+    if (!existing || existing.paketUjian.guruId !== currentUser.id) {
+      throw new Error('Forbidden');
+    }
+
+    return await this.jadwalUjianRepository.deleteJadwal(id);
+  };
+}
+
+export default ScheduleService;

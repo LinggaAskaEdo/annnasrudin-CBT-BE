@@ -1,37 +1,43 @@
-import prisma from '../config/prisma.js';
+class ModulRepository {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
 
-export const create = async (data) => {
-  return await prisma.modul.create({
-    data
-  });
-};
+  create = async (data) => {
+    return await this.prisma.modul.create({
+      data
+    });
+  };
 
-export const findAll = async (filters = {}) => {
-  return await prisma.modul.findMany({
-    where: filters,
-    include: {
-      guru: { select: { name: true } },
-      rombel: { select: { name: true } }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
-};
+  findAll = async (filters = {}) => {
+    return await this.prisma.modul.findMany({
+      where: filters,
+      include: {
+        guru: { select: { name: true } },
+        rombel: { select: { name: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  };
 
-export const findById = async (id) => {
-  return await prisma.modul.findUnique({
-    where: { id }
-  });
-};
+  findById = async (id) => {
+    return await this.prisma.modul.findUnique({
+      where: { id }
+    });
+  };
 
-export const updateModul = async (id, data) => {
-  return await prisma.modul.update({
-    where: { id },
-    data
-  });
-};
+  updateModul = async (id, data) => {
+    return await this.prisma.modul.update({
+      where: { id },
+      data
+    });
+  };
 
-export const deleteModul = async (id) => {
-  return await prisma.modul.delete({
-    where: { id }
-  });
-};
+  deleteModul = async (id) => {
+    return await this.prisma.modul.delete({
+      where: { id }
+    });
+  };
+}
+
+export default ModulRepository;

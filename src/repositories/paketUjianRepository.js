@@ -1,42 +1,48 @@
-import prisma from '../config/prisma.js';
+class PaketUjianRepository {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
 
-export const findById = async (id) => {
-  return await prisma.paketUjian.findUnique({
-    where: { id },
-    include: {
+  findById = async (id) => {
+    return await this.prisma.paketUjian.findUnique({
+      where: { id },
+      include: {
         soals: true,
         mapel: { select: { name: true } }
-    }
-  });
-};
-
-export const findAll = async (filters = {}) => {
-  return await prisma.paketUjian.findMany({
-    where: filters,
-    include: {
-      soals: true,
-      mapel: { select: { name: true } }
-    }
-  });
-};
-
-export const create = async (data) => {
-  return await prisma.paketUjian.create({
-    data
-  });
-};
-
-export const update = async (id, data) => {
-  return await prisma.paketUjian.update({
-    where: { id },
-    data
-  });
-};
-
-export const deletePackage = async (id) => {
-    // Manual cascading for soals
-    await prisma.soal.deleteMany({ where: { paketUjianId: id } });
-    return await prisma.paketUjian.delete({
-        where: { id }
+      }
     });
-};
+  };
+
+  findAll = async (filters = {}) => {
+    return await this.prisma.paketUjian.findMany({
+      where: filters,
+      include: {
+        soals: true,
+        mapel: { select: { name: true } }
+      }
+    });
+  };
+
+  create = async (data) => {
+    return await this.prisma.paketUjian.create({
+      data
+    });
+  };
+
+  update = async (id, data) => {
+    return await this.prisma.paketUjian.update({
+      where: { id },
+      data
+    });
+  };
+
+  deletePackage = async (id) => {
+    // Manual cascading for soals
+    await this.prisma.soal.deleteMany({ where: { paketUjianId: id } });
+    return await this.prisma.paketUjian.delete({
+      where: { id }
+    });
+  };
+}
+
+export default PaketUjianRepository;

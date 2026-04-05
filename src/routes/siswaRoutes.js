@@ -1,26 +1,24 @@
 import express from 'express';
-import { updateProfile, getAvailableModules, getAvailableExams, getResults, getResultDetail } from '../controllers/siswaController.js';
-import { startExam, submitExam } from '../controllers/examSessionController.js';
-import { authenticate, isSiswa } from '../middlewares/authMiddleware.js';
+import { siswaController, examSessionController, authMiddleware } from '../container.js';
 
 const router = express.Router();
 
-router.use(authenticate);
-router.use(isSiswa);
+router.use(authMiddleware.authenticate);
+router.use(authMiddleware.isSiswa);
 
 // Profile
-router.patch('/profile', updateProfile);
+router.patch('/profile', siswaController.updateProfile);
 
 // Learning Materials
-router.get('/modules', getAvailableModules);
+router.get('/modules', siswaController.getAvailableModules);
 
 // Exam Sessions (CBT)
-router.get('/exams', getAvailableExams);
-router.post('/exams/:scheduleId/start', startExam);
-router.post('/exams/:scheduleId/submit', submitExam);
+router.get('/exams', siswaController.getAvailableExams);
+router.post('/exams/:scheduleId/start', examSessionController.startExam);
+router.post('/exams/:scheduleId/submit', examSessionController.submitExam);
 
 // Results History
-router.get('/results', getResults);
-router.get('/results/:hasilUjianId', getResultDetail);
+router.get('/results', siswaController.getResults);
+router.get('/results/:hasilUjianId', siswaController.getResultDetail);
 
 export default router;

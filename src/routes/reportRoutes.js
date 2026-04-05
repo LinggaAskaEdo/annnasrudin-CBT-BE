@@ -1,13 +1,12 @@
 import express from 'express';
-import { getClassroomReport } from '../controllers/reportController.js';
-import { authenticate, isGuru } from '../middlewares/authMiddleware.js';
+import { reportController, authMiddleware } from '../container.js';
 
 const router = express.Router();
 
-router.use(authenticate);
-router.use(isGuru);
+router.use(authMiddleware.authenticate);
+router.use(authMiddleware.isGuru);
 
 // Guru/Admin can view classroom-wide report in JSON
-router.get('/exams/:scheduleId', getClassroomReport);
+router.get('/exams/:scheduleId', reportController.getClassroomReport);
 
 export default router;

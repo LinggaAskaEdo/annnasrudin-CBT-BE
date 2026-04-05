@@ -9,7 +9,7 @@ const mPrisma = {
 
 // Mocking authUtils
 jest.unstable_mockModule('../src/utils/authUtils.js', () => ({
-  verifyToken: jest.fn(() => ({ id: 'current-admin', role: 'ADMIN', sessionId: 'session-1' })),
+  verifyToken: jest.fn(() => ({ id: 'current-admin', username: 'admin_test', role: 'ADMIN', sessionId: 'session-1' })),
   hashPassword: jest.fn(() => 'hashed-pass'),
   comparePassword: jest.fn(() => true),
   generateDefaultPassword: jest.fn(() => 'H7HGX4'),
@@ -34,8 +34,16 @@ describe('Admin CRUD Unit Tests', () => {
             if (where.id === 'current-admin') {
                 return Promise.resolve({ 
                     id: 'current-admin', 
+                    username: 'admin_test',
                     role: 'ADMIN', 
                     currentSessionId: 'session-1' 
+                });
+            }
+            if (where.id === 'user-to-delete' || where.id === 'user-id') {
+                return Promise.resolve({
+                    id: where.id,
+                    username: 'target-user',
+                    role: 'SISWA'
                 });
             }
             return Promise.resolve(null);

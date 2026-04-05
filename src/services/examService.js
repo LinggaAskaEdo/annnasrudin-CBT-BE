@@ -1,69 +1,75 @@
-import * as paketUjianRepository from '../repositories/paketUjianRepository.js';
-import * as soalRepository from '../repositories/soalRepository.js';
-
-export const createExamPackage = async (title, mapelId, guruId) => {
-  return await paketUjianRepository.create({
-    title,
-    mapelId,
-    guruId
-  });
-};
-
-export const createQuestion = async (questionData, currentUser) => {
-  const { paketUjianId } = questionData;
-  const paketUjian = await paketUjianRepository.findById(paketUjianId);
-  if (!paketUjian || paketUjian.guruId !== currentUser.id) {
-    throw new Error('Forbidden');
+class ExamService {
+  constructor(paketUjianRepository, soalRepository) {
+    this.paketUjianRepository = paketUjianRepository;
+    this.soalRepository = soalRepository;
   }
 
-  return await soalRepository.create(questionData);
-};
+  createExamPackage = async (title, mapelId, guruId) => {
+    return await this.paketUjianRepository.create({
+      title,
+      mapelId,
+      guruId
+    });
+  };
 
-export const getBankSoal = async (query) => {
-  const { mapelId, search } = query;
-  const filters = {};
-  if (mapelId) filters.paketUjian = { mapelId };
-  if (search) filters.questionText = { contains: search };
+  createQuestion = async (questionData, currentUser) => {
+    const { paketUjianId } = questionData;
+    const paketUjian = await this.paketUjianRepository.findById(paketUjianId);
+    if (!paketUjian || paketUjian.guruId !== currentUser.id) {
+      throw new Error('Forbidden');
+    }
 
-  return await soalRepository.findAll(filters);
-};
+    return await this.soalRepository.create(questionData);
+  };
 
-export const getMyPackages = async (guruId) => {
-  return await paketUjianRepository.findAll({ guruId });
-};
+  getBankSoal = async (query) => {
+    const { mapelId, search } = query;
+    const filters = {};
+    if (mapelId) filters.paketUjian = { mapelId };
+    if (search) filters.questionText = { contains: search };
 
-export const updateExamPackage = async (id, title, mapelId, currentUser) => {
-  const existing = await paketUjianRepository.findById(id);
-  if (!existing || existing.guruId !== currentUser.id) {
-    throw new Error('Forbidden');
-  }
+    return await this.soalRepository.findAll(filters);
+  };
 
-  return await paketUjianRepository.update(id, { title, mapelId });
-};
+  getMyPackages = async (guruId) => {
+    return await this.paketUjianRepository.findAll({ guruId });
+  };
 
-export const deleteExamPackage = async (id, currentUser) => {
-  const existing = await paketUjianRepository.findById(id);
-  if (!existing || existing.guruId !== currentUser.id) {
-    throw new Error('Forbidden');
-  }
+  updateExamPackage = async (id, title, mapelId, currentUser) => {
+    const existing = await this.paketUjianRepository.findById(id);
+    if (!existing || existing.guruId !== currentUser.id) {
+      throw new Error('Forbidden');
+    }
 
-  return await paketUjianRepository.deletePackage(id);
-};
+    return await this.paketUjianRepository.update(id, { title, mapelId });
+  };
 
-export const updateQuestion = async (id, questionData, currentUser) => {
-  const existing = await soalRepository.findById(id);
-  if (!existing || existing.paketUjian.guruId !== currentUser.id) {
-    throw new Error('Forbidden');
-  }
+  deleteExamPackage = async (id, currentUser) => {
+    const existing = await this.paketUjianRepository.findById(id);
+    if (!existing || existing.guruId !== currentUser.id) {
+      throw new Error('Forbidden');
+    }
 
-  return await soalRepository.update(id, questionData);
-};
+    return await this.paketUjianRepository.deletePackage(id);
+  };
 
-export const deleteQuestion = async (id, currentUser) => {
-  const existing = await soalRepository.findById(id);
-  if (!existing || existing.paketUjian.guruId !== currentUser.id) {
-    throw new Error('Forbidden');
-  }
+  updateQuestion = async (id, questionData, currentUser) => {
+    const existing = await this.soalRepository.findById(id);
+    if (!existing || existing.paketUjian.guruId !== currentUser.id) {
+      throw new Error('Forbidden');
+    }
 
-  return await soalRepository.deleteSoal(id);
-};
+    return await this.soalRepository.update(id, questionData);
+  };
+
+  deleteQuestion = async (id, currentUser) => {
+    const existing = await this.soalRepository.findById(id);
+    if (!existing || existing.paketUjian.guruId !== currentUser.id) {
+      throw new Error('Forbidden');
+    }
+
+    return await this.soalRepository.deleteSoal(id);
+  };
+}
+
+export default ExamService;

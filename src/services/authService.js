@@ -1,54 +1,61 @@
-import * as userRepository from '../repositories/userRepository.js';
 import { comparePassword, generateToken } from '../utils/authUtils.js';
 
-/**
- * Handles user authentication
- * @param {string} username
- * @param {string} password
- * @param {string} sessionId
- * @returns {Promise<{user: object, token: string}>}
- */
-export const loginUser = async (username, password, sessionId) => {
-  const user = await userRepository.findByUsername(username);
-
-  if (!user) {
-    throw new Error('Invalid username or password');
+class AuthService {
+  constructor(userRepository) {
+    this.userRepository = userRepository;
   }
 
-  const isPasswordValid = (user.role === 'ADMIN')
-    ? await comparePassword(password, user.password)
-    : (password === user.password); // Plain text comparison for Guru/Siswa
+  /**
+   * Handles user authentication
+   * @param {string} username
+   * @param {string} password
+   * @param {string} sessionId
+   * @returns {Promise<{user: object, token: string}>}
+   */
+  loginUser = async (username, password, sessionId) => {
+    const user = await this.userRepository.findByUsername(username);
 
-  if (!isPasswordValid) {
-    throw new Error('Invalid username or password');
-  }
+    if (!user) {
+      throw new Error('Invalid username or password');
+    }
 
-  // Update user with new sessionId
-  await userRepository.update(user.id, { currentSessionId: sessionId });
+    const isPasswordValid = (user.role === 'ADMIN')
+      ? await comparePassword(password, user.password)
+      : (password === user.password); // Plain text comparison for Guru/Siswa
 
-  // Generate JWT access token with sessionId
-  const token = generateToken({
-    id: user.id,
-    username: user.username,
-    role: user.role,
-    sessionId // Critical for session validation
-  });
+    if (!isPasswordValid) {
+      throw new Error('Invalid username or password');
+    }
 
-  return {
-    user: {
+    // Update user with new sessionId
+    await this.userRepository.update(user.id, { currentSessionId: sessionId });
+
+    // Generate JWT access token with sessionId
+    const token = generateToken({
       id: user.id,
       username: user.username,
-      name: user.name,
-      role: user.role
-    },
-    token
-  };
-};
+      role: user.role,
+      sessionId // Critical for session validation
+    });
 
-/**
- * Handles user logout
- * @param {string} userId
- */
-export const logoutUser = async (userId) => {
-  await userRepository.update(userId, { currentSessionId: null });
-};
+    return {
+      user: {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        role: user.role
+      },
+      token
+    };
+  };
+
+  /**
+   * Handles user logout
+   * @param {string} userId
+   */
+  logoutUser = async (userId) => {
+    await this.userRepository.update(userId, { currentSessionId: null });
+  };
+}
+
+export default AuthService;
