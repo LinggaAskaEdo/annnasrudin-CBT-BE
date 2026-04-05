@@ -1,41 +1,47 @@
-import prisma from '../config/prisma.js';
+class SoalRepository {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
 
-export const create = async (data) => {
-  return await prisma.soal.create({
-    data
-  });
-};
+  create = async (data) => {
+    return await this.prisma.soal.create({
+      data
+    });
+  };
 
-export const findById = async (id) => {
-  return await prisma.soal.findUnique({
-    where: { id },
-    include: { paketUjian: true }
-  });
-};
+  findById = async (id) => {
+    return await this.prisma.soal.findUnique({
+      where: { id },
+      include: { paketUjian: true }
+    });
+  };
 
-export const findAll = async (filters = {}) => {
-  return await prisma.soal.findMany({
-    where: filters,
-    include: {
-      paketUjian: {
-        include: {
-          guru: { select: { name: true } },
-          mapel: { select: { name: true } }
+  findAll = async (filters = {}) => {
+    return await this.prisma.soal.findMany({
+      where: filters,
+      include: {
+        paketUjian: {
+          include: {
+            guru: { select: { name: true } },
+            mapel: { select: { name: true } }
+          }
         }
       }
-    }
-  });
-};
+    });
+  };
 
-export const update = async (id, data) => {
-  return await prisma.soal.update({
-    where: { id },
-    data
-  });
-};
+  update = async (id, data) => {
+    return await this.prisma.soal.update({
+      where: { id },
+      data
+    });
+  };
 
-export const deleteSoal = async (id) => {
-  return await prisma.soal.delete({
-    where: { id }
-  });
-};
+  deleteSoal = async (id) => {
+    return await this.prisma.soal.delete({
+      where: { id }
+    });
+  };
+}
+
+export default SoalRepository;

@@ -1,25 +1,31 @@
-import prisma from '../config/prisma.js';
+class RombelRepository {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
 
-export const findById = async (id) => {
-  return await prisma.rombel.findUnique({
-    where: { id }
-  });
-};
+  findById = async (id) => {
+    return await this.prisma.rombel.findUnique({
+      where: { id }
+    });
+  };
 
-export const findByName = async (name) => {
-  return await prisma.rombel.findUnique({
-    where: { name }
-  });
-};
+  findByName = async (name) => {
+    return await this.prisma.rombel.findUnique({
+      where: { name }
+    });
+  };
 
-export const findAll = async () => {
-  return await prisma.rombel.findMany({
-    orderBy: { name: 'asc' }
-  });
-};
+  findAll = async () => {
+    return await this.prisma.rombel.findMany({
+      orderBy: { name: 'asc' }
+    });
+  };
 
-export const create = async (data) => {
-  return await prisma.rombel.create({
-    data
-  });
-};
+  create = async (data) => {
+    return await this.prisma.rombel.create({
+      data
+    });
+  };
+}
+
+export default RombelRepository;

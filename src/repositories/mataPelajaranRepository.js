@@ -1,25 +1,31 @@
-import prisma from '../config/prisma.js';
+class MataPelajaranRepository {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
 
-export const findAll = async () => {
-  return await prisma.mataPelajaran.findMany({
-    orderBy: { name: 'asc' }
-  });
-};
+  findAll = async () => {
+    return await this.prisma.mataPelajaran.findMany({
+      orderBy: { name: 'asc' }
+    });
+  };
 
-export const create = async (data) => {
-  return await prisma.mataPelajaran.create({
-    data
-  });
-};
+  create = async (data) => {
+    return await this.prisma.mataPelajaran.create({
+      data
+    });
+  };
 
-export const findByName = async (name) => {
-  return await prisma.mataPelajaran.findUnique({
-    where: { name }
-  });
-};
+  findByName = async (name) => {
+    return await this.prisma.mataPelajaran.findUnique({
+      where: { name }
+    });
+  };
 
-export const findById = async (id) => {
-  return await prisma.mataPelajaran.findUnique({
-    where: { id }
-  });
-};
+  findById = async (id) => {
+    return await this.prisma.mataPelajaran.findUnique({
+      where: { id }
+    });
+  };
+}
+
+export default MataPelajaranRepository;

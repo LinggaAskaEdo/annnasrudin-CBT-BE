@@ -1,50 +1,56 @@
-import * as modulRepository from '../repositories/modulRepository.js';
-
-export const createModul = async (title, filePath, guruId, rombelId) => {
-  return await modulRepository.create({
-    title,
-    filePath,
-    guruId,
-    rombelId
-  });
-};
-
-export const getModules = async (query, currentUser) => {
-  const { rombelId } = query;
-  const filters = {};
-  if (rombelId) filters.rombelId = rombelId;
-
-  // Filter based on user role (Guru can see all within filter, Siswa can see only their rombel)
-  if (currentUser.role === 'SISWA') {
-    filters.rombelId = currentUser.rombelId;
+class ModuleService {
+  constructor(modulRepository) {
+    this.modulRepository = modulRepository;
   }
 
-  return await modulRepository.findAll(filters);
-};
+  createModul = async (title, filePath, guruId, rombelId) => {
+    return await this.modulRepository.create({
+      title,
+      filePath,
+      guruId,
+      rombelId
+    });
+  };
 
-export const getMyModules = async (guruId) => {
-  return await modulRepository.findAll({ guruId });
-};
+  getModules = async (query, currentUser) => {
+    const { rombelId } = query;
+    const filters = {};
+    if (rombelId) filters.rombelId = rombelId;
 
-export const updateModul = async (id, title, filePath, currentUser) => {
-  const modul = await modulRepository.findById(id);
-  if (!modul) throw new Error('Modul tidak ditemukan');
+    // Filter based on user role (Guru can see all within filter, Siswa can see only their rombel)
+    if (currentUser.role === 'SISWA') {
+      filters.rombelId = currentUser.rombelId;
+    }
 
-  if (modul.guruId !== currentUser.id && currentUser.role !== 'ADMIN') {
-    throw new Error('Forbidden');
-  }
+    return await this.modulRepository.findAll(filters);
+  };
 
-  return await modulRepository.updateModul(id, { title, filePath });
-};
+  getMyModules = async (guruId) => {
+    return await this.modulRepository.findAll({ guruId });
+  };
 
-export const deleteModul = async (id, currentUser) => {
-  const modul = await modulRepository.findById(id);
-  if (!modul) throw new Error('Modul tidak ditemukan');
+  updateModul = async (id, title, filePath, currentUser) => {
+    const modul = await this.modulRepository.findById(id);
+    if (!modul) throw new Error('Modul tidak ditemukan');
 
-  // Only the guru who created can delete
-  if (modul.guruId !== currentUser.id && currentUser.role !== 'ADMIN') {
-    throw new Error('Forbidden');
-  }
+    if (modul.guruId !== currentUser.id && currentUser.role !== 'ADMIN') {
+      throw new Error('Forbidden');
+    }
 
-  return await modulRepository.deleteModul(id);
-};
+    return await this.modulRepository.updateModul(id, { title, filePath });
+  };
+
+  deleteModul = async (id, currentUser) => {
+    const modul = await this.modulRepository.findById(id);
+    if (!modul) throw new Error('Modul tidak ditemukan');
+
+    // Only the guru who created can delete
+    if (modul.guruId !== currentUser.id && currentUser.role !== 'ADMIN') {
+      throw new Error('Forbidden');
+    }
+
+    return await this.modulRepository.deleteModul(id);
+  };
+}
+
+export default ModuleService;

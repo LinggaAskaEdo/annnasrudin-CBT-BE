@@ -28,7 +28,7 @@ describe('Guru Features Unit Tests', () => {
         jest.clearAllMocks();
         mPrisma.user.findUnique.mockImplementation(({ where }) => {
             if (where.id === 'guru-1') {
-                return Promise.resolve({ id: 'guru-1', role: 'GURU', currentSessionId: 'session-1' });
+                return Promise.resolve({ id: 'guru-1', username: 'guru_test', role: 'GURU', currentSessionId: 'session-1' });
             }
             return Promise.resolve(null);
         });

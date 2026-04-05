@@ -3,12 +3,17 @@ import { jest } from '@jest/globals';
 // Mocking authService BEFORE anything else
 // Note: We need to use default export because that's how it's imported in controllers sometimes, 
 // but here it's usually named exports.
-jest.unstable_mockModule('../src/services/authService.js', () => ({
+const mockAuthService = {
   loginUser: jest.fn(),
   logoutUser: jest.fn(),
+};
+
+jest.unstable_mockModule('../src/services/authService.js', () => ({
+  default: jest.fn().mockImplementation(() => mockAuthService),
+  ...mockAuthService
 }));
 
-jest.unstable_mockModule('../src/middlewares/authMiddleware.js', () => ({
+const mockAuthMiddleware = {
   authenticate: jest.fn((req, res, next) => {
     req.user = { id: '1', username: 'admin', role: 'ADMIN' };
     next();
@@ -17,6 +22,11 @@ jest.unstable_mockModule('../src/middlewares/authMiddleware.js', () => ({
   isGuru: jest.fn((req, res, next) => next()),
   isSiswa: jest.fn((req, res, next) => next()),
   authorize: jest.fn(() => (req, res, next) => next())
+};
+
+jest.unstable_mockModule('../src/middlewares/authMiddleware.js', () => ({
+  default: jest.fn().mockImplementation(() => mockAuthMiddleware),
+  ...mockAuthMiddleware
 }));
 
 const { default: app } = await import('../src/app.js');

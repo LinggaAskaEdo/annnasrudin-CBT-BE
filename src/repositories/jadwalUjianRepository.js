@@ -1,51 +1,57 @@
-import prisma from '../config/prisma.js';
+class JadwalUjianRepository {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
 
-export const findAll = async (filters = {}) => {
-  return await prisma.jadwalUjian.findMany({
-    where: filters,
-    include: {
-      paketUjian: {
-        include: {
-          mapel: true,
-          soals: true
-        }
+  findAll = async (filters = {}) => {
+    return await this.prisma.jadwalUjian.findMany({
+      where: filters,
+      include: {
+        paketUjian: {
+          include: {
+            mapel: true,
+            soals: true
+          }
+        },
+        rombel: true
       },
-      rombel: true
-    },
-    orderBy: { startTime: 'desc' }
-  });
-};
+      orderBy: { startTime: 'desc' }
+    });
+  };
 
-export const findById = async (id) => {
-  return await prisma.jadwalUjian.findUnique({
-    where: { id },
-    include: {
-      paketUjian: {
-        include: {
-          mapel: true,
-          soals: true
-        }
-      },
-      rombel: true
-    }
-  });
-};
+  findById = async (id) => {
+    return await this.prisma.jadwalUjian.findUnique({
+      where: { id },
+      include: {
+        paketUjian: {
+          include: {
+            mapel: true,
+            soals: true
+          }
+        },
+        rombel: true
+      }
+    });
+  };
 
-export const create = async (data) => {
-  return await prisma.jadwalUjian.create({
-    data
-  });
-};
+  create = async (data) => {
+    return await this.prisma.jadwalUjian.create({
+      data
+    });
+  };
 
-export const update = async (id, data) => {
-  return await prisma.jadwalUjian.update({
-    where: { id },
-    data
-  });
-};
+  update = async (id, data) => {
+    return await this.prisma.jadwalUjian.update({
+      where: { id },
+      data
+    });
+  };
 
-export const deleteJadwal = async (id) => {
-  return await prisma.jadwalUjian.delete({
-    where: { id }
-  });
-};
+  deleteJadwal = async (id) => {
+    return await this.prisma.jadwalUjian.delete({
+      where: { id }
+    });
+  };
+}
+
+export default JadwalUjianRepository;

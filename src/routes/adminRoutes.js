@@ -1,24 +1,23 @@
 import express from 'express';
-import { createUser, getAllUsers, updateAdminProfile, deleteUser, changeUserPassword, createRombel, getAllRombels } from '../controllers/adminController.js';
-import { authenticate, isAdmin } from '../middlewares/authMiddleware.js';
+import { adminController, authMiddleware } from '../container.js';
 
 const router = express.Router();
 
 // All routes here are protected by JWT and Admin check
-router.use(authenticate);
-router.use(isAdmin);
+router.use(authMiddleware.authenticate);
+router.use(authMiddleware.isAdmin);
 
 // Admin profile management
-router.patch('/profile', updateAdminProfile);
+router.patch('/profile', adminController.updateAdminProfile);
 
 // Admin-only: User control
-router.post('/users', createUser);
-router.get('/users', getAllUsers);
-router.delete('/users/:id', deleteUser);
-router.patch('/users/:id/password', changeUserPassword);
+router.post('/users', adminController.createUser);
+router.get('/users', adminController.getAllUsers);
+router.delete('/users/:id', adminController.deleteUser);
+router.patch('/users/:id/password', adminController.changeUserPassword);
 
 // Rombel management
-router.post('/rombel', createRombel);
-router.get('/rombel', getAllRombels);
+router.post('/rombel', adminController.createRombel);
+router.get('/rombel', adminController.getAllRombels);
 
 export default router;
