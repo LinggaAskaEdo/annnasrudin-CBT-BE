@@ -37,6 +37,12 @@ export const login = async (req, res, next) => {
       }
     });
   } catch (error) {
+    if (error.message) {
+      return res.status(401).json({
+        status: 'error',
+        message: error.message
+      });
+    }
     next(error);
   }
 };

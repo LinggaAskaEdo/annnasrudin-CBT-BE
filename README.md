@@ -1,132 +1,106 @@
-# Sistem CBT SD (Computer Based Test)
+# API Documentation - Sistem CBT SD
 
-Sistem CBT SD adalah backend application berbasis Node.js yang ditujukan
-untuk mengelola ujian berbasis komputer (CBT) interaktif bagi siswa
-Sekolah Dasar. Sistem ini memiliki 3 pengguna (Role) utama, yaitu **Admin**,
-**Guru**, dan **Siswa**, dengan akses dan fungsi yang tersegregasi.
-
-## 🚀 Fitur Utama
-
-- **Role-Based Access Control (RBAC):** Autentikasi aman menggunakan JWT
-  dengan batasan akses penuh per-role.
-- **Sistem Keamanan Sesi Ganda:** Mencegah satu user untuk login di banyak
-  perangkat secara serentak. Jika login di perangkat baru, sesi lama akan
-  otomatis keluar dengan pesan: `"Sedang login di perangkat lain"`.
-- **Penilaian Manual & Skor Independen:** Guru dapat menilai soal Uraian
-  secara manual. Skor Pilihan Ganda (`scorePilgan`) dan Uraian (`scoreUraian`)
-  dicatat secara terpisah sesuai jenis ujiannya.
-- **Laporan Otomatis:** Output JSON format untuk rekapitulasi nilai kelas keseluruhan.
-- **API Documentation Terintegrasi:** Spesifikasi lengkap menggunakan Swagger UI.
-- **Laporan Otomatis:** Output JSON format untuk rekapitulasi nilai kelas
-  keseluruhan.
-- **API Documentation Terintegrasi:** Spesifikasi lengkap menggunakan
-  Swagger UI.
+Dokumentasi ini berisi daftar seluruh endpoint API yang tersedia pada Sistem CBT SD.
 
 ---
 
-## 🛠️ Stack Teknologi Terapan
+## 1. Authentication (`/api/auth`)
 
-- **Runtime:** Node.js LTS (ES Modules)
-- **Framework:** Express.js 5.x
-- **ORM:** Prisma v6
-- **Database:** MySQL
-- **Auth:** JWT + Bcrypt
-- **Documentation:** Swagger / OpenAPI 3.0
+| Endpoint    | Method   | Description   | Request Body                                 |
+|-------------|----------|---------------|----------------------------------------------|
+| `/login`    | POST     | Login user    | `{ "username": "...", "password": "..." }`   |
+| `/logout`   | POST     | Logout user   | -                                            |
 
 ---
 
-## ⚙️ Petunjuk Pemasangan (Setup Guide)
+## 2. Admin Management (`/api/admin`)
 
-1. **Clone & Install**
+### Role: ADMIN (Admin Management)
 
-   ```bash
-   git clone <repo-url>
-   npm install
-   ```
-
-2. **Environment (.env)**
-
-   ```env
-   DATABASE_URL="mysql://root:pass@localhost:3306/cbt_db"
-   PORT=3000
-   JWT_SECRET="your_secret"
-   ```
-
-3. **Database Sync**
-
-   ```bash
-   npx prisma db push
-   npx prisma generate
-   npm run seed
-   ```
-
-4. **Run**
-
-   ```bash
-   npm run dev
-   ```
+| Endpoint                | Method   | Description           | Request Body                                                         |
+|-------------------------|----------|-----------------------|----------------------------------------------------------------------|
+| `/profile`              | PATCH    | Update profil admin   | `{ "name": "...", "password": "..." }`                               |
+| `/users`                | POST     | Buat user baru        | `{ "username": "...", "name": "...", "role": "GURU/SISWA", ... }`    |
+| `/users`                | GET      | Daftar semua user     | -                                                                    |
+| `/users/:id`            | DELETE   | Hapus user            | -                                                                    |
+| `/users/:id/password`   | PATCH    | Reset password user   | `{ "newPassword": "..." }`                                           |
+| `/rombel`               | POST     | Buat Rombel baru      | `{ "name": "..." }`                                                  |
+| `/rombel`               | GET      | Daftar semua rombel   | -                                                                    |
 
 ---
 
-## 📖 Dokumentasi API
+## 3. Guru Features (`/api/guru`)
 
-Seluruh request yang membutuhkan autentikasi harus menyertakan Header:
-`Authorization: Bearer <token>`
+### Role: GURU (Guru Features)
 
-### 🔐 Autentikasi
-
-| Method | Endpoint | Role | Deskripsi |
-| :--- | :--- | :--- | :--- |
-| POST | `/api/auth/login` | Publik | Login & mendapatkan Token |
-| POST | `/api/auth/logout` | All | Logout & hapus sesi aktif |
-
-### 👨‍💼 Admin (Manajemen User)
-
-| Method | Endpoint | Deskripsi |
-| :--- | :--- | :--- |
-| PATCH | `/api/admin/profile` | Update nama/password Admin sendiri |
-| POST | `/api/admin/users` | Buat User baru (**ADMIN**, **GURU**, **SISWA**) |
-| GET | `/api/admin/users` | List semua user |
-
-### 👨‍🏫 Guru (Materi & Ujian)
-
-| Method | Endpoint | Deskripsi |
-| :--- | :--- | :--- |
-| POST/PUT/DELETE | `/api/modules/` | Kelola Modul PDF (Upload ke `/uploads`) |
-| POST/PUT/DELETE | `/api/exams/packages` | Kelola Paket Ujian |
-| POST/PUT/DELETE | `/api/exams/questions` | Kelola Bank Soal |
-| POST/PUT/DELETE | `/api/exams/schedule` | Kelola Jadwal Ujian Rombel |
-| GET | `/api/guru/siswa` | Lihat daftar siswa per Rombel |
-| PATCH | `/api/guru/submissions/:id/grade` | Berikan nilai & feedback Uraian |
-
-### 👶 Siswa (Pengerjaan Ujian)
-
-| Method | Endpoint | Deskripsi |
-| :--- | :--- | :--- |
-| GET | `/api/siswa/modules` | Lihat modul yang tersedia untuk Rombelnya |
-| GET | `/api/siswa/exams` | Lihat jadwal ujian aktif/mendatang |
-| POST | `/api/siswa/exams/:id/start` | Mulai sesi ujian (mendapat soal) |
-| POST | `/api/siswa/exams/:id/submit` | Kirim jawaban ujian (Auto-grading Pilgan) |
-| GET | `/api/siswa/results` | Lihat riwayat dan detail nilai |
-
-### 📊 Laporan
-
-| Method | Endpoint | Deskripsi |
-| :--- | :--- | :--- |
-| GET | `/api/reports/classroom/:scheduleId` | Rekapitulasi nilai satu kelas |
+| Endpoint                   | Method   | Description            | Request Body                                                |
+|----------------------------|----------|------------------------|-------------------------------------------------------------|
+| `/profile`                 | PATCH    | Update profil guru     | `{ "name": "...", "password": "..." }`                      |
+| `/siswa`                   | GET      | Daftar siswa           | -                                                           |
+| `/siswa`                   | POST     | Buat akun siswa        | `{ "username": "...", "name": "...", "rombelId": "..." }`   |
+| `/siswa/:id`               | DELETE   | Hapus akun siswa       | -                                                           |
+| `/rombel`                  | POST     | Buat Rombel baru       | `{ "name": "..." }`                                         |
+| `/rombel`                  | GET      | Daftar semua rombel    | -                                                           |
+| `/exam-results`            | GET      | Lihat hasil ujian      | -                                                           |
+| `/submissions/:id`         | GET      | Detail jawaban siswa   | -                                                           |
+| `/submissions/:id/grade`   | PATCH    | Penilaian uraian       | `{ "uraianGrades": [...] }`                                 |
 
 ---
 
-## 👥 Alur Penggunaan (User Workflow) Dasar
+## 4. Siswa Features (`/api/siswa`)
 
-1. **Admin** mendaftarkan Guru & Siswa, serta memberikan _Password Default_.
-2. **Guru** login, mengunggah materi belajar, menyusun soal, dan menentukan
-   jadwal ujian.
-3. **Siswa** mengerjakan ujian sesuai jadwal. Sistem otomatis mengoreksi
-   Pilihan Ganda.
-4. **Guru** masuk ke menu grading untuk mengoreksi Soal Uraian secara manual.
-5. **Skor Independen**: Nilai Pilihan Ganda dan Nilai Uraian tersimpan
-   secara terpisah dan dapat dipantau oleh Siswa maupun Guru/Admin via
-   Laporan.
+### Role: SISWA (Siswa Features)
 
-**Swagger Docs:** `http://localhost:3000/api-docs`
+| Endpoint             | Method   | Description          | Request Body              |
+|----------------------|----------|----------------------|---------------------------|
+| `/profile`           | PATCH    | Ganti password       | `{ "password": "..." }`   |
+| `/modules`           | GET      | Materi belajar       | -                         |
+| `/exams`             | GET      | Daftar ujian aktif   | -                         |
+| `/exams/:id/start`   | POST     | Mulai ujian          | -                         |
+| `/exams/:id/submit`  | POST     | Kumpulkan jawaban    | `{ "answers": [...] }`    |
+| `/results`           | GET      | Riwayat nilai        | -                         |
+| `/results/:id`       | GET      | Detail nilai         | -                         |
+
+---
+
+## 5. Exam Management (`/api/exams`)
+
+### Role: GURU (Exam Management)
+
+| Endpoint           | Method   | Description         | Request Body                                                                       |
+|--------------------|----------|---------------------|------------------------------------------------------------------------------------|
+| `/packages`        | POST     | Buat paket soal     | `{ "title": "...", "mapelId": "..." }`                                             |
+| `/my-packages`     | GET      | Paket soal saya     | -                                                                                  |
+| `/packages/:id`    | PUT      | Edit paket soal     | `{ "title": "..." }`                                                               |
+| `/packages/:id`    | DELETE   | Hapus paket soal    | -                                                                                  |
+| `/questions`       | POST     | Tambah soal         | `{ "paketUjianId": "...", "type": "PILGAN/URAIAN", ... }`                          |
+| `/bank-soal`       | GET      | Lihat bank soal     | -                                                                                  |
+| `/questions/:id`   | PUT      | Edit soal           | -                                                                                  |
+| `/questions/:id`   | DELETE   | Hapus soal          | -                                                                                  |
+| `/schedule`        | POST     | Buat jadwal ujian   | `{ "paketUjianId": "...", "rombelId": "...", "startAt": "...", "endAt": "..." }`   |
+| `/my-schedules`    | GET      | Jadwal saya         | -                                                                                  |
+| `/schedule/:id`    | PUT      | Edit jadwal         | -                                                                                  |
+| `/schedule/:id`    | DELETE   | Hapus jadwal        | -                                                                                  |
+
+---
+
+## 6. Learning Materials (`/api/modules`)
+
+### Role: GURU (Learning Materials)
+
+| Endpoint   | Method   | Description          | Request Body                                   |
+|------------|----------|----------------------|------------------------------------------------|
+| `/`        | POST     | Upload Modul (PDF)   | *Multipart/Form-Data* (title, pdf, rombelId)   |
+| `/:id`     | PUT      | Update Modul         | *Multipart/Form-Data*                          |
+| `/:id`     | DELETE   | Hapus Modul          | -                                              |
+| `/my`      | GET      | Modul saya           | -                                              |
+
+---
+
+## 7. Reports (`/api/reports`)
+
+### Role: GURU (Reports)
+
+| Endpoint              | Method   | Description         | Request Body   |
+|-----------------------|----------|---------------------|----------------|
+| `/exams/:scheduleId`  | GET      | Hasil Rekap Kelas   | -              |
