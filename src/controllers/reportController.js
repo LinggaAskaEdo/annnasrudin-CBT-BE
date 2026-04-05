@@ -1,5 +1,4 @@
 import * as reportService from '../services/reportService.js';
-import winston from '../utils/logger.js';
 
 /**
  * Generates a JSON report for all siswa results in a specific exam schedule.
@@ -15,7 +14,6 @@ export const getClassroomReport = async (req, res, next) => {
       data: reportData
     });
   } catch (error) {
-    winston.error(`Report generation failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };

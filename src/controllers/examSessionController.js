@@ -19,8 +19,7 @@ export const startExam = async (req, res, next) => {
       }
     });
   } catch (error) {
-    winston.error(`Starting exam failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -44,7 +43,6 @@ export const submitExam = async (req, res, next) => {
         scorePilgan
     });
   } catch (error) {
-    winston.error(`Submitting exam failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };

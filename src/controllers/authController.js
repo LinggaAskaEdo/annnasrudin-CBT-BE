@@ -37,11 +37,7 @@ export const login = async (req, res, next) => {
       }
     });
   } catch (error) {
-    winston.error(`Login failed: ${error.message}`);
-    res.status(401).json({
-      status: 'error',
-      message: error.message
-    });
+    next(error);
   }
 };
 
@@ -59,10 +55,6 @@ export const logout = async (req, res, next) => {
       message: 'Logged out successfully'
     });
   } catch (error) {
-    winston.error(`Logout failed: ${error.message}`);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
+    next(error);
   }
 };

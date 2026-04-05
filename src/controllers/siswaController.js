@@ -1,5 +1,4 @@
 import * as siswaService from '../services/siswaService.js';
-import winston from '../utils/logger.js';
 
 export const updateProfile = async (req, res, next) => {
   const { password } = req.body;
@@ -11,8 +10,7 @@ export const updateProfile = async (req, res, next) => {
     await siswaService.updateProfile(req.user.id, password);
     res.json({ status: 'success', message: 'Password updated successfully' });
   } catch (error) {
-    winston.error(`Siswa profile update failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -21,8 +19,7 @@ export const getAvailableModules = async (req, res, next) => {
     const modules = await siswaService.getAvailableModules(req.user.id);
     res.json({ status: 'success', data: modules });
   } catch (error) {
-    winston.error(`Fetching modules for siswa failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -31,8 +28,7 @@ export const getAvailableExams = async (req, res, next) => {
     const exams = await siswaService.getAvailableExams(req.user.id);
     res.json({ status: 'success', data: exams });
   } catch (error) {
-    winston.error(`Fetching exams for siswa failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -41,8 +37,7 @@ export const getResults = async (req, res, next) => {
     const results = await siswaService.getResults(req.user.id);
     res.json({ status: 'success', data: results });
   } catch (error) {
-    winston.error(`Fetching results for siswa failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -53,7 +48,6 @@ export const getResultDetail = async (req, res, next) => {
     const result = await siswaService.getResultDetail(hasilUjianId, req.user.id);
     res.json({ status: 'success', data: result });
   } catch (error) {
-    winston.error(`Fetching result detail for siswa failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };

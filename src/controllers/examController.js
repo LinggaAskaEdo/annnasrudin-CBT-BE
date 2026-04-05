@@ -12,8 +12,7 @@ export const createExamPackage = async (req, res, next) => {
       data: newPackage
     });
   } catch (error) {
-    winston.error(`Exam Package creation failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -25,8 +24,7 @@ export const createQuestion = async (req, res, next) => {
       data: newQuestion
     });
   } catch (error) {
-    winston.error(`Question creation failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -38,8 +36,7 @@ export const getBankSoal = async (req, res, next) => {
       data: bank
     });
   } catch (error) {
-    winston.error(`Bank Soal retrieval failed: ${error.message}`);
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -48,7 +45,7 @@ export const getMyPackages = async (req, res, next) => {
     const packages = await examService.getMyPackages(req.user.id);
     res.json({ status: 'success', data: packages });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -60,7 +57,7 @@ export const updateExamPackage = async (req, res, next) => {
     const updated = await examService.updateExamPackage(id, title, mapelId, req.user);
     res.json({ status: 'success', data: updated });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -71,7 +68,7 @@ export const deleteExamPackage = async (req, res, next) => {
     await examService.deleteExamPackage(id, req.user);
     res.json({ status: 'success', message: 'Exam package and its questions deleted successfully' });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -82,7 +79,7 @@ export const updateQuestion = async (req, res, next) => {
     const updated = await examService.updateQuestion(id, req.body, req.user);
     res.json({ status: 'success', data: updated });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
@@ -93,6 +90,6 @@ export const deleteQuestion = async (req, res, next) => {
     await examService.deleteQuestion(id, req.user);
     res.json({ status: 'success', message: 'Question deleted successfully' });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    next(error);
   }
 };
