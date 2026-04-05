@@ -3,7 +3,8 @@ import { jest } from '@jest/globals';
 const mPrisma = {
     hasilUjian: { findFirst: jest.fn(), findUnique: jest.fn(), update: jest.fn(), upsert: jest.fn(), findMany: jest.fn() },
     jadwalUjian: { findUnique: jest.fn(), findMany: jest.fn() },
-    user: { create: jest.fn(), update: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() }
+    user: { create: jest.fn(), update: jest.fn(), delete: jest.fn(), findUnique: jest.fn(), findMany: jest.fn() },
+    rombel: { create: jest.fn(), findMany: jest.fn(), findUnique: jest.fn() }
 };
 
 // Mocking authUtils
@@ -92,6 +93,67 @@ describe('Admin CRUD Unit Tests', () => {
             }));
 
             expect(res.body.status).toEqual('success');
+        });
+    });
+
+    describe('User Management', () => {
+        test('GET /api/admin/users should return all users', async () => {
+            mPrisma.user.findMany.mockResolvedValue([{ id: '1', username: 'admin' }]);
+
+            const res = await request(app)
+                .get('/api/admin/users')
+                .set('Authorization', `Bearer ${mockToken}`);
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body.data).toBeInstanceOf(Array);
+        });
+
+        test('DELETE /api/admin/users/:id should delete a user', async () => {
+            mPrisma.user.delete.mockResolvedValue({ id: 'user-to-delete' });
+
+            const res = await request(app)
+                .delete('/api/admin/users/user-to-delete')
+                .set('Authorization', `Bearer ${mockToken}`);
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body.status).toEqual('success');
+        });
+
+        test('PATCH /api/admin/users/:id/password should change password', async () => {
+            mPrisma.user.update.mockResolvedValue({ id: 'user-id' });
+
+            const res = await request(app)
+                .patch('/api/admin/users/user-id/password')
+                .set('Authorization', `Bearer ${mockToken}`)
+                .send({ newPassword: 'new-secure-password' });
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body.status).toEqual('success');
+        });
+    });
+
+    describe('Rombel Management', () => {
+        test('POST /api/admin/rombel should create a new rombel', async () => {
+            mPrisma.rombel.create.mockResolvedValue({ id: 'r1', name: '7A' });
+
+            const res = await request(app)
+                .post('/api/admin/rombel')
+                .set('Authorization', `Bearer ${mockToken}`)
+                .send({ name: '7A' });
+
+            expect(res.statusCode).toEqual(201);
+            expect(res.body.data.name).toEqual('7A');
+        });
+
+        test('GET /api/admin/rombel should return all rombels', async () => {
+            mPrisma.rombel.findMany.mockResolvedValue([{ id: 'r1', name: '7A' }]);
+
+            const res = await request(app)
+                .get('/api/admin/rombel')
+                .set('Authorization', `Bearer ${mockToken}`);
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body.data).toBeInstanceOf(Array);
         });
     });
 });

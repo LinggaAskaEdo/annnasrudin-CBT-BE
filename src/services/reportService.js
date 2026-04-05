@@ -29,6 +29,7 @@ export const getClassroomReport = async (scheduleId) => {
       username: h.siswa.username,
       scorePilgan: h.scorePilgan,
       scoreUraian: h.scoreUraian,
+      totalScore: (h.scorePilgan || 0) + (h.scoreUraian || 0),
       status: h.status,
       submittedAt: h.updatedAt
     };

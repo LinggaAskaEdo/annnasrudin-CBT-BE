@@ -120,6 +120,16 @@ paths:
           content:
             application/json:
               example: { status: "error", message: "Invalid username or password" }
+  /auth/logout:
+    post:
+      summary: Logout User
+      tags: [Auth]
+      responses:
+        '200':
+          description: Berhasil logout
+          content:
+            application/json:
+              example: { status: "success", message: "Logged out successfully" }
 
   /admin/users:
     post:
@@ -247,7 +257,25 @@ paths:
             application/json:
               example: { status: "success", data: [ { id: "uuid", name: "Kelas 6A" } ] }
 
+        '403':
+          description: Forbidden (Hanya bisa role SISWA)
   /guru/siswa:
+    get:
+      summary: Daftar Siswa (Filter by Rombel/Search)
+      tags: [Guru]
+      parameters:
+        - in: query
+          name: rombelId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: { status: "success", data: [] }
     post:
       summary: Guru membuat User Siswa baru
       tags: [Guru]
@@ -271,8 +299,23 @@ paths:
               example:
                 status: success
                 data: { user: { id: "uuid", username: "siswa_baru" }, defaultPassword: "..." }
-        '403':
-          description: Forbidden (Hanya bisa role SISWA)
+  /guru/exam-results:
+    get:
+      summary: Lihat Hasil Ujian Siswa
+      tags: [Guru]
+      parameters:
+        - in: query
+          name: rombelId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: jadwalUjianId
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: { status: "success", data: [] }
 
   /guru/siswa/{id}:
     delete:
@@ -344,6 +387,21 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /guru/submissions/{hasilUjianId}:
+    get:
+      summary: Detail pengumpulan ujian siswa
+      tags: [Guru]
+      parameters:
+        - in: path
+          name: hasilUjianId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: { status: "success", data: { id: "uuid", answers: [] } }
 
   /guru/submissions/{hasilUjianId}/grade:
     patch:
@@ -376,6 +434,35 @@ paths:
             application/json:
               example: { status: "success", message: "Grading updated successfully" }
 
+  /siswa/profile:
+    patch:
+      summary: Update Password Siswa
+      tags: [Siswa]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+      responses:
+        '200':
+          description: OK
+  /siswa/modules:
+    get:
+      summary: Daftar Materi Siswa
+      tags: [Siswa]
+      responses:
+        '200':
+          description: OK
+  /siswa/exams:
+    get:
+      summary: Daftar Ujian Tersedia
+      tags: [Siswa]
+      responses:
+        '200':
+          description: OK
+
   /modules:
     post:
       summary: Upload Modul (PDF)
@@ -395,6 +482,46 @@ paths:
           content:
             application/json:
               example: { status: "success", data: { id: "uuid", title: "Modul IPA Bab 1" } }
+    get:
+      summary: Daftar Modul Saya (Guru)
+      tags: [Modules]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: { status: "success", data: [] }
+  /modules/{id}:
+    put:
+      summary: Update Modul
+      tags: [Modules]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                pdf: { type: string, format: binary }
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Hapus Modul
+      tags: [Modules]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
 
   /exams/packages:
     post:
@@ -415,6 +542,42 @@ paths:
           content:
             application/json:
               example: { status: "success", data: { id: "uuid", title: "UTS IPA" } }
+    get:
+      summary: List Paket Ujian Saya
+      tags: [Exams]
+      responses:
+        '200':
+          description: OK
+  /exams/packages/{id}:
+    put:
+      summary: Update Paket Ujian
+      tags: [Exams]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Hapus Paket Ujian
+      tags: [Exams]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
 
   /exams/questions:
     post:
@@ -442,6 +605,87 @@ paths:
           content:
             application/json:
               example: { status: "error", message: "Forbidden" }
+  /exams/questions/{id}:
+    put:
+      summary: Update Soal
+      tags: [Exams]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Hapus Soal
+      tags: [Exams]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+  /exams/bank-soal:
+    get:
+      summary: Bank Soal (Guru only)
+      tags: [Exams]
+      parameters:
+        - in: query
+          name: mapelId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+  /exams/schedule:
+    post:
+      summary: Buat Jadwal Ujian
+      tags: [Exams]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paketUjianId, rombelId, startAt, endAt]
+      responses:
+        '201':
+          description: OK
+    get:
+      summary: Daftar Jadwal Saya
+      tags: [Exams]
+      responses:
+        '200':
+          description: OK
+  /exams/schedule/{id}:
+    put:
+      summary: Update Jadwal
+    delete:
+      summary: Hapus Jadwal
+  /siswa/results:
+    get:
+      summary: Riwayat Hasil Ujian Siswa
+      tags: [Siswa]
+      responses:
+        '200':
+          description: OK
+  /siswa/results/{hasilUjianId}:
+    get:
+      summary: Detail Hasil Ujian
+      tags: [Siswa]
+      parameters:
+        - in: path
+          name: hasilUjianId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
 
   /siswa/exams/{scheduleId}/start:
     post:

@@ -8,6 +8,17 @@ jest.unstable_mockModule('../src/services/authService.js', () => ({
   logoutUser: jest.fn(),
 }));
 
+jest.unstable_mockModule('../src/middlewares/authMiddleware.js', () => ({
+  authenticate: jest.fn((req, res, next) => {
+    req.user = { id: '1', username: 'admin', role: 'ADMIN' };
+    next();
+  }),
+  isAdmin: jest.fn((req, res, next) => next()),
+  isGuru: jest.fn((req, res, next) => next()),
+  isSiswa: jest.fn((req, res, next) => next()),
+  authorize: jest.fn(() => (req, res, next) => next())
+}));
+
 const { default: app } = await import('../src/app.js');
 const { default: request } = await import('supertest');
 const authService = await import('../src/services/authService.js');
@@ -39,5 +50,17 @@ describe('Auth Controller Integration', () => {
 
     expect(res.statusCode).toEqual(401);
     expect(res.body.status).toEqual('error');
+  });
+
+  test('POST /api/auth/logout should return 200 on success', async () => {
+    // Setup mock success
+    authService.logoutUser.mockResolvedValue();
+
+    const res = await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.status).toEqual('success');
   });
 });
