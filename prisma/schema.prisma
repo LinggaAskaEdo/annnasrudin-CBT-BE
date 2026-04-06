@@ -44,8 +44,8 @@ model User {
   // Guru can create multiple modules
   modules Modul[]
   
-  // Guru can create multiple exam packages
-  paketUjians PaketUjian[]
+  // Admin/Guru can create multiple exams
+  ujians Ujian[]
 
   // Siswa belongs to a Rombel
   rombelId String?
@@ -79,9 +79,6 @@ model MataPelajaran {
 
   // Many guru can teach one subject (and vice versa)
   guru User[] @relation("GuruMapels")
-
-  // Subject linked to exam packages
-  paketUjians PaketUjian[]
 }
 
 model Modul {
@@ -100,24 +97,21 @@ model Modul {
   rombel   Rombel @relation(fields: [rombelId], references: [id])
 }
 
-model PaketUjian {
+model Ujian {
   id        String   @id @default(uuid())
   title     String
+  mapel     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Linked to Subject
-  mapelId String
-  mapel   MataPelajaran @relation(fields: [mapelId], references: [id])
+  // Created by Admin/Guru
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
 
-  // Created by Guru
-  guruId String
-  guru   User   @relation(fields: [guruId], references: [id])
-
-  // Questions in this package
+  // Questions in this exam
   soals Soal[]
 
-  // Schedules using this package
+  // Schedules using this exam
   jadwalUjians JadwalUjian[]
 }
 
@@ -130,9 +124,9 @@ model Soal {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  // Part of an Exam Package
-  paketUjianId String
-  paketUjian   PaketUjian @relation(fields: [paketUjianId], references: [id])
+  // Part of an Exam
+  ujianId String
+  ujian   Ujian @relation(fields: [ujianId], references: [id])
 }
 
 model JadwalUjian {
@@ -143,9 +137,9 @@ model JadwalUjian {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Using a specific PaketUjian
-  paketUjianId String
-  paketUjian   PaketUjian @relation(fields: [paketUjianId], references: [id])
+  // Using a specific Ujian
+  ujianId String
+  ujian   Ujian @relation(fields: [ujianId], references: [id])
 
   // Assigned to a Rombel
   rombelId String
