@@ -188,7 +188,92 @@ error) secara spesifik untuk Sistem CBT SD.
       "username": "admin"
     }
   }
+
+---
+
+### 2.4 Hapus User
+
+- **Method:** `DELETE`
+- **Endpoint:** `/admin/users/:id`
+- **Akses:** ADMIN
+- **Path Params:** `id` (UUID User)
+- **Response Sukses (200 OK):**
+
+  ```json
+  {
+    "status": "success",
+    "message": "User berhasil dihapus"
+  }
   ```
+
+### 2.5 Ubah Password User (Reset)
+
+- **Method:** `PATCH`
+- **Endpoint:** `/admin/users/:id/password`
+- **Akses:** ADMIN
+- **Path Params:** `id` (UUID User)
+- **Request Body (JSON):**
+
+  ```json
+  {
+    "newPassword": "PasswordBaru123"
+  }
+  ```
+
+- **Response Sukses (200 OK):**
+
+  ```json
+  {
+    "status": "success",
+    "message": "Password user berhasil diubah"
+  }
+  ```
+
+### 2.6 Buat Rombel (Kelas)
+
+- **Method:** `POST`
+- **Endpoint:** `/admin/rombel`
+- **Akses:** ADMIN
+- **Request Body (JSON):**
+
+  ```json
+  {
+    "name": "Kelas 6A"
+  }
+  ```
+
+- **Response Sukses (201 Created):**
+
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "id": "uuid",
+      "name": "Kelas 6A"
+    }
+  }
+  ```
+
+### 2.7 Lihat Daftar Rombel
+
+- **Method:** `GET`
+- **Endpoint:** `/admin/rombel`
+- **Akses:** ADMIN
+- **Response Sukses (200 OK):**
+
+  ```json
+  {
+    "status": "success",
+    "data": [
+      {
+        "id": "uuid",
+        "name": "Kelas 6A"
+      }
+    ]
+  }
+  ```
+
+---
 
 ---
 
@@ -305,10 +390,88 @@ error) secara spesifik untuk Sistem CBT SD.
   }
   ```
 
+  ```json
+  {
+    "status": "success",
+    "message": "Grading updated successfully",
+    "data": {
+      "id": "uuid-hasil",
+      "scorePilgan": 80,
+      "scoreUraian": 15,
+      "totalScore": 95
+    }
+  }
+  ```
+
+### 3.6 Tambah Siswa Baru (Oleh Guru)
+
+- **Method:** `POST`
+- **Endpoint:** `/guru/siswa`
+- **Akses:** GURU
+- **Request Body (JSON):**
+
+  ```json
+  {
+    "username": "siswa_akbar",
+    "name": "Akbar Ramadhan",
+    "role": "SISWA",
+    "rombelId": "uuid-rombel"
+  }
+  ```
+
+- **Response Sukses (201 Created):**
+
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "user": { "id": "uuid", "username": "siswa_akbar", "name": "..." },
+      "defaultPassword": "X7Y8Z"
+    }
+  }
+  ```
+
+### 3.7 Hapus Siswa (Oleh Guru)
+
+- **Method:** `DELETE`
+- **Endpoint:** `/guru/siswa/:id`
+- **Akses:** GURU
+- **Path Params:** `id` (UUID Siswa)
 - **Response Sukses (200 OK):**
 
   ```json
-  { "status": "success", "message": "Grading updated successfully" }
+  { "status": "success", "message": "User berhasil dihapus" }
+  ```
+
+### 3.8 Buat Rombel Baru (Oleh Guru)
+
+- **Method:** `POST`
+- **Endpoint:** `/guru/rombel`
+- **Akses:** GURU
+- **Request Body (JSON):**
+
+  ```json
+  { "name": "Kelas 6B" }
+  ```
+
+- **Response Sukses (201 Created):**
+
+  ```json
+  { "status": "success", "data": { "id": "uuid", "name": "Kelas 6B" } }
+  ```
+
+### 3.9 Lihat Daftar Rombel (Oleh Guru)
+
+- **Method:** `GET`
+- **Endpoint:** `/guru/rombel`
+- **Akses:** GURU
+- **Response Sukses (200 OK):**
+
+  ```json
+  {
+    "status": "success",
+    "data": [ { "id": "uuid", "name": "Kelas 6A" } ]
+  }
   ```
 
 ---
@@ -713,7 +876,19 @@ error) secara spesifik untuk Sistem CBT SD.
   ```json
   {
     "status": "success",
-    "data": [ { "id": "uuid", "judulUjian": "UTS IPA", "score": 85, "submittedAt": "..." } ]
+    "data": [
+      {
+        "id": "uuid",
+        "scorePilgan": 80,
+        "scoreUraian": 15,
+        "status": "COMPLETED",
+        "submittedAt": "...",
+        "jadwalUjian": {
+          "id": "uuid-schedule",
+          "ujian": { "title": "UTS IPA" }
+        }
+      }
+    ]
   }
   ```
 
@@ -730,9 +905,24 @@ error) secara spesifik untuk Sistem CBT SD.
     "status": "success",
     "data": {
       "examTitle": "UTS IPA",
-      "score": 85,
+      "scorePilgan": 80,
+      "scoreUraian": 15,
+      "totalScore": 95,
       "answers": [
-        { "questionText": "...", "siswaAnswer": "...", "isCorrect": true, "score": 10 }
+        {
+          "questionText": "Ibukota Indonesia?",
+          "siswaAnswer": "Jakarta",
+          "isCorrect": true,
+          "score": 10,
+          "type": "PILGAN"
+        },
+        {
+          "questionText": "Jelaskan fotosintesis",
+          "siswaAnswer": "...",
+          "score": 15,
+          "guruFeedback": "Sangat baik",
+          "type": "URAIAN"
+        }
       ]
     }
   }
@@ -754,15 +944,16 @@ error) secara spesifik untuk Sistem CBT SD.
   {
     "status": "success",
     "data": {
-      "examTitle": "UTS IPA",
+      "judulUjian": "UTS IPA",
       "subject": "IPA",
       "rombel": "Kelas 6A",
       "results": [
         {
           "siswaName": "Andi",
           "username": "siswa_andi",
-          "autoScore": 75,
-          "uraianTotalPoints": 15,
+          "scorePilgan": 75,
+          "scoreUraian": 15,
+          "totalScore": 90,
           "status": "COMPLETED",
           "submittedAt": "..."
         }
