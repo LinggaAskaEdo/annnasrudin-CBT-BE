@@ -13,9 +13,9 @@ router.patch('/profile', siswaController.updateProfile);
 router.get('/modules', siswaController.getAvailableModules);
 
 // Exam Sessions (CBT)
-router.get('/exams', siswaController.getAvailableExams);
-router.post('/exams/:scheduleId/start', examSessionController.startExam);
-router.post('/exams/:scheduleId/submit', examSessionController.submitExam);
+router.get('/ujian', siswaController.getAvailableExams);
+router.post('/ujian/:scheduleId/start', examSessionController.startExam);
+router.post('/ujian/:scheduleId/submit', examSessionController.submitExam);
 
 // Results History
 router.get('/results', siswaController.getResults);

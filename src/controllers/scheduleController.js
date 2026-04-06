@@ -8,7 +8,7 @@ class ScheduleController {
   scheduleExam = async (req, res, next) => {
     try {
       const newSchedule = await this.scheduleService.createSchedule(req.body, req.user);
-      winston.info(`CBT Schedule created for ${newSchedule.paketUjianId} to Rombel ${req.body.rombelId}`);
+      winston.info(`CBT Schedule created for ${newSchedule.ujianId} to Rombel ${req.body.rombelId}`);
       res.status(201).json({
         status: 'success',
         data: newSchedule

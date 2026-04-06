@@ -42,7 +42,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/guru', guruRoutes);
 app.use('/api/modules', moduleRoutes);
-app.use('/api/exams', examRoutes);
+app.use('/api/ujian', examRoutes);
 app.use('/api/siswa', siswaRoutes);
 app.use('/api/reports', reportRoutes);
 

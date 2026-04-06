@@ -8,7 +8,7 @@ router.use(authMiddleware.isGuru);
 
 router.patch('/profile', guruController.updateProfile);
 router.get('/siswa', guruController.getSiswa);
-router.get('/exam-results', guruController.getExamResults);
+router.get('/hasil-ujian', guruController.getExamResults);
 
 // Siswa Management by Guru
 router.post('/siswa', adminController.createUser);
@@ -19,7 +19,7 @@ router.post('/rombel', adminController.createRombel);
 router.get('/rombel', adminController.getAllRombels);
 
 // Manual Grading
-router.get('/submissions/:hasilUjianId', guruController.getSubmissionDetail);
-router.patch('/submissions/:hasilUjianId/grade', guruController.gradeUraian);
+router.get('/pengumpulan/:hasilUjianId', guruController.getSubmissionDetail);
+router.patch('/pengumpulan/:hasilUjianId/grade', guruController.gradeUraian);
 
 export default router;

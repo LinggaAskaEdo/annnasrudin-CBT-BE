@@ -6,7 +6,7 @@ import HasilUjianRepository from './repositories/hasilUjianRepository.js';
 import JadwalUjianRepository from './repositories/jadwalUjianRepository.js';
 import MataPelajaranRepository from './repositories/mataPelajaranRepository.js';
 import ModulRepository from './repositories/modulRepository.js';
-import PaketUjianRepository from './repositories/paketUjianRepository.js';
+import UjianRepository from './repositories/ujianRepository.js';
 import RombelRepository from './repositories/rombelRepository.js';
 import SoalRepository from './repositories/soalRepository.js';
 
@@ -42,20 +42,20 @@ const hasilUjianRepository = new HasilUjianRepository(prisma);
 const jadwalUjianRepository = new JadwalUjianRepository(prisma);
 const mataPelajaranRepository = new MataPelajaranRepository(prisma);
 const modulRepository = new ModulRepository(prisma);
-const paketUjianRepository = new PaketUjianRepository(prisma);
+const ujianRepository = new UjianRepository(prisma);
 const rombelRepository = new RombelRepository(prisma);
 const soalRepository = new SoalRepository(prisma);
 
 // Instantiate Services
 const authService = new AuthService(userRepository);
 const userService = new UserService(userRepository);
-const examService = new ExamService(paketUjianRepository, soalRepository);
+const examService = new ExamService(ujianRepository, soalRepository);
 const examSessionService = new ExamSessionService(hasilUjianRepository, jadwalUjianRepository);
 const guruService = new GuruService(userRepository, hasilUjianRepository);
 const moduleService = new ModuleService(modulRepository);
 const reportService = new ReportService(hasilUjianRepository, jadwalUjianRepository);
 const rombelService = new RombelService(rombelRepository);
-const scheduleService = new ScheduleService(jadwalUjianRepository, paketUjianRepository);
+const scheduleService = new ScheduleService(jadwalUjianRepository, ujianRepository);
 const siswaService = new SiswaService(userRepository, modulRepository, jadwalUjianRepository, hasilUjianRepository);
 
 // Instantiate Controllers
