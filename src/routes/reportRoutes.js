@@ -7,6 +7,6 @@ router.use(authMiddleware.authenticate);
 router.use(authMiddleware.isGuru);
 
 // Guru/Admin can view classroom-wide report in JSON
-router.get('/exams/:scheduleId', reportController.getClassroomReport);
+router.get('/ujian/:scheduleId', reportController.getClassroomReport);
 
 export default router;

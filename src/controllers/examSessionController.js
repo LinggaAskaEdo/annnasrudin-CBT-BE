@@ -13,13 +13,13 @@ class ExamSessionController {
     const siswaId = req.user.id;
 
     try {
-      const { session, questions } = await this.examSessionService.startExam(scheduleId, siswaId);
+      const { session, soal } = await this.examSessionService.startExam(scheduleId, siswaId);
 
       res.json({
         status: 'success',
         data: {
           session,
-          questions
+          soal
         }
       });
     } catch (error) {
@@ -43,7 +43,7 @@ class ExamSessionController {
 
       res.json({
         status: 'success',
-        message: 'Exam submitted successfully',
+        message: 'Ujian berhasil dikumpulkan',
         scorePilgan
       });
     } catch (error) {

@@ -39,8 +39,8 @@ class ReportService {
     });
 
     return {
-      examTitle: schedule.paketUjian.title,
-      subject: schedule.paketUjian.mapel.name,
+      judulUjian: schedule.ujian.title,
+      subject: schedule.ujian.mapel,
       rombel: schedule.rombel.name,
       results: processedResults
     };

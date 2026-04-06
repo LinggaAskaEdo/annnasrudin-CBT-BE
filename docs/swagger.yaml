@@ -75,7 +75,7 @@ tags:
   - name: Admin
   - name: Guru
   - name: Modules
-  - name: Exams
+  - name: Ujian
   - name: Siswa
   - name: Reports
 
@@ -299,7 +299,7 @@ paths:
               example:
                 status: success
                 data: { user: { id: "uuid", username: "siswa_baru" }, defaultPassword: "..." }
-  /guru/exam-results:
+  /guru/hasil-ujian:
     get:
       summary: Lihat Hasil Ujian Siswa
       tags: [Guru]
@@ -387,7 +387,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
-  /guru/submissions/{hasilUjianId}:
+  /guru/pengumpulan/{hasilUjianId}:
     get:
       summary: Detail pengumpulan ujian siswa
       tags: [Guru]
@@ -403,7 +403,7 @@ paths:
             application/json:
               example: { status: "success", data: { id: "uuid", answers: [] } }
 
-  /guru/submissions/{hasilUjianId}/grade:
+  /guru/pengumpulan/{hasilUjianId}/grade:
     patch:
       summary: Berikan nilai & feedback soal Uraian
       tags: [Guru]
@@ -455,7 +455,7 @@ paths:
       responses:
         '200':
           description: OK
-  /siswa/exams:
+  /siswa/ujian:
     get:
       summary: Daftar Ujian Tersedia
       tags: [Siswa]
@@ -523,10 +523,10 @@ paths:
         '200':
           description: OK
 
-  /exams/packages:
+  /ujian:
     post:
-      summary: Buat Paket Ujian
-      tags: [Exams]
+      summary: Buat Ujian Baru
+      tags: [Ujian]
       requestBody:
         required: true
         content:
@@ -535,23 +535,23 @@ paths:
               type: object
               properties:
                 title: { type: string, example: "Ujian Tengah Semester IPA" }
-                mapelId: { type: string, format: uuid }
+                mapel: { type: string, example: "IPA" }
       responses:
         '201':
           description: OK
           content:
             application/json:
-              example: { status: "success", data: { id: "uuid", title: "UTS IPA" } }
+              example: { status: "success", data: { id: "uuid", title: "UTS IPA", mapel: "IPA", createdById: "uuid" } }
     get:
-      summary: List Paket Ujian Saya
-      tags: [Exams]
+      summary: Daftar Ujian Saya
+      tags: [Ujian]
       responses:
         '200':
           description: OK
-  /exams/packages/{id}:
+  /ujian/{id}:
     put:
-      summary: Update Paket Ujian
-      tags: [Exams]
+      summary: Update Ujian
+      tags: [Ujian]
       parameters:
         - in: path
           name: id
@@ -564,12 +564,13 @@ paths:
               type: object
               properties:
                 title: { type: string }
+                mapel: { type: string }
       responses:
         '200':
           description: OK
     delete:
-      summary: Hapus Paket Ujian
-      tags: [Exams]
+      summary: Hapus Ujian
+      tags: [Ujian]
       parameters:
         - in: path
           name: id
@@ -579,10 +580,10 @@ paths:
         '200':
           description: OK
 
-  /exams/questions:
+  /ujian/soal:
     post:
-      summary: Tambah Soal ke Paket Ujian
-      tags: [Exams]
+      summary: Tambah Soal ke Ujian
+      tags: [Ujian]
       requestBody:
         required: true
         content:
@@ -590,7 +591,7 @@ paths:
             schema:
               type: object
               properties:
-                paketUjianId: { type: string, format: uuid }
+                ujianId: { type: string, format: uuid }
                 questionType: { type: string, enum: [PILGAN, URAIAN], example: "PILGAN" }
                 questionText: { type: string, example: "Apa ibukota Indonesia?" }
                 options:
@@ -605,10 +606,10 @@ paths:
           content:
             application/json:
               example: { status: "error", message: "Forbidden" }
-  /exams/questions/{id}:
+  /ujian/soal/{id}:
     put:
       summary: Update Soal
-      tags: [Exams]
+      tags: [Ujian]
       parameters:
         - in: path
           name: id
@@ -619,7 +620,7 @@ paths:
           description: OK
     delete:
       summary: Hapus Soal
-      tags: [Exams]
+      tags: [Ujian]
       parameters:
         - in: path
           name: id
@@ -628,45 +629,47 @@ paths:
       responses:
         '200':
           description: OK
-  /exams/bank-soal:
+  /ujian/soal/bank:
     get:
       summary: Bank Soal (Guru only)
-      tags: [Exams]
+      tags: [Ujian]
       parameters:
         - in: query
-          name: mapelId
-          schema: { type: string, format: uuid }
+          name: mapel
+          schema: { type: string }
         - in: query
           name: search
           schema: { type: string }
       responses:
         '200':
           description: OK
-  /exams/schedule:
+  /ujian/schedule:
     post:
       summary: Buat Jadwal Ujian
-      tags: [Exams]
+      tags: [Ujian]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [paketUjianId, rombelId, startAt, endAt]
+              required: [ujianId, rombelId, startAt, endAt]
       responses:
         '201':
           description: OK
     get:
       summary: Daftar Jadwal Saya
-      tags: [Exams]
+      tags: [Ujian]
       responses:
         '200':
           description: OK
-  /exams/schedule/{id}:
+  /ujian/schedule/{id}:
     put:
       summary: Update Jadwal
+      tags: [Ujian]
     delete:
       summary: Hapus Jadwal
+      tags: [Ujian]
   /siswa/results:
     get:
       summary: Riwayat Hasil Ujian Siswa
@@ -687,7 +690,7 @@ paths:
         '200':
           description: OK
 
-  /siswa/exams/{scheduleId}/start:
+  /siswa/ujian/{scheduleId}/start:
     post:
       summary: Siswa memulai pengerjaan Ujian
       tags: [Siswa]
@@ -705,14 +708,14 @@ paths:
                 status: success
                 data:
                   session: { id: "uuid", status: "ONGOING", startTime: "2026-04-03T10:00:00Z" }
-                  questions: [ { id: "uuid", questionText: "Soal", options: ["A", "B", "C", "D"] } ]
+                  soal: [ { id: "uuid", questionText: "Soal", options: ["A", "B", "C", "D"] } ]
         '400':
           description: Ujian belum waktunya / Sudah dikerjakan
           content:
             application/json:
-              example: { status: "error", message: "Exam not available at this time" }
+              example: { status: "error", message: "Ujian belum atau sudah tidak tersedia" }
 
-  /siswa/exams/{scheduleId}/submit:
+  /siswa/ujian/{scheduleId}/submit:
     post:
       summary: Siswa mengumpulkan jawaban ujian (Auto-grading)
       tags: [Siswa]
@@ -740,13 +743,13 @@ paths:
           description: Berhasil submit
           content:
             application/json:
-              example: { status: "success", message: "Exam submitted successfully", score: 100 }
+              example: { status: "success", message: "Ujian berhasil dikumpulkan", score: 100 }
         '400':
           description: Tidak ada sesi ujian aktif
         '500':
           description: Internal Server Error
 
-  /reports/exams/{scheduleId}:
+  /reports/ujian/{scheduleId}:
     get:
       summary: Laporan Nilai Akhir Kelas (Format JSON)
       tags: [Reports]

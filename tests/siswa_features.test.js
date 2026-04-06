@@ -77,41 +77,42 @@ describe('Siswa Features Unit Tests', () => {
     });
 
     describe('Exam Sessions', () => {
-        test('GET /api/siswa/exams should return scheduled exams', async () => {
+        test('GET /api/siswa/ujian should return scheduled exams', async () => {
             mPrisma.jadwalUjian.findMany.mockResolvedValue([{ 
                 id: 'j1', 
-                paketUjianId: 'p1',
-                paketUjian: { title: 'UTS', mapel: { name: 'Math' } },
+                ujianId: 'p1',
+                ujian: { title: 'UTS', mapel: 'Math' },
                 hasilUjians: [],
                 startTime: new Date(),
                 deadline: new Date(Date.now() + 3600000)
             }]);
 
             const res = await request(app)
-                .get('/api/siswa/exams')
+                .get('/api/siswa/ujian')
                 .set('Authorization', `Bearer ${mockToken}`);
 
             expect(res.statusCode).toBe(200);
             expect(res.body.data).toBeInstanceOf(Array);
         });
 
-        test('POST /api/siswa/exams/:id/start should create a session', async () => {
+        test('POST /api/siswa/ujian/:id/start should create a session', async () => {
             mPrisma.jadwalUjian.findUnique.mockResolvedValue({ 
                 id: 'j1', 
                 startAt: new Date(Date.now() - 1000), 
                 deadline: new Date(Date.now() + 100000), 
-                paketUjianId: 'p1',
-                paketUjian: { soals: [{ id: 'q1', type: 'PILGAN' }] }
+                ujianId: 'p1',
+                ujian: { soals: [{ id: 'q1', type: 'PILGAN' }] }
             });
             mPrisma.hasilUjian.findMany.mockResolvedValue([]); // For check existing session
             mPrisma.hasilUjian.create.mockResolvedValue({ id: 'h1', status: 'ONGOING' });
 
             const res = await request(app)
-                .post('/api/siswa/exams/j1/start')
+                .post('/api/siswa/ujian/j1/start')
                 .set('Authorization', `Bearer ${mockToken}`);
 
             expect(res.statusCode).toBe(200);
             expect(res.body.data.session).toBeDefined();
+            expect(res.body.data.soal).toBeDefined();
         });
     });
 

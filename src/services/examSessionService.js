@@ -6,7 +6,7 @@ class ExamSessionService {
 
   startExam = async (scheduleId, siswaId) => {
     const schedule = await this.jadwalUjianRepository.findById(scheduleId);
-    if (!schedule) throw new Error('Exam not found');
+    if (!schedule) throw new Error('Ujian tidak ditemukan');
 
     const existingSessions = await this.hasilUjianRepository.findByFilters({
       siswaId,
@@ -16,7 +16,7 @@ class ExamSessionService {
     const session = existingSessions.length > 0 ? existingSessions[0] : null;
 
     if (session?.status === 'COMPLETED') {
-      throw new Error('Exam already submitted');
+      throw new Error('Ujian sudah dikumpulkan');
     }
 
     const now = new Date();
@@ -24,11 +24,11 @@ class ExamSessionService {
     // Lazy Force-Submit: If deadline passed but session is still ONGOING
     if (session?.status === 'ONGOING' && now > schedule.deadline) {
       await this.hasilUjianRepository.update(session.id, { status: 'COMPLETED' });
-      throw new Error('Exam period has ended');
+      throw new Error('Waktu ujian telah berakhir');
     }
 
     if (now < schedule.startTime || now > schedule.deadline) {
-      throw new Error('Exam not available at this time');
+      throw new Error('Ujian belum atau sudah tidak tersedia');
     }
 
     let result;
@@ -45,14 +45,14 @@ class ExamSessionService {
     }
 
     // Strip correct answers before sending to siswa
-    const questionsForSiswa = schedule.paketUjian.soals.map(s => {
+    const questionsForSiswa = schedule.ujian.soals.map(s => {
       const { correctAnswer, ...safeQuestion } = s;
       return safeQuestion;
     });
 
     return {
       session: result,
-      questions: questionsForSiswa
+      soal: questionsForSiswa
     };
   };
 
@@ -64,13 +64,13 @@ class ExamSessionService {
     });
 
     const session = sessions.length > 0 ? sessions[0] : null;
-    if (!session) throw new Error('No active session found');
+    if (!session) throw new Error('Sesi ujian aktif tidak ditemukan');
 
     const schedule = await this.jadwalUjianRepository.findById(scheduleId);
 
     // Auto-Grading Logic
     let score = 0;
-    const questions = schedule.paketUjian.soals;
+    const questions = schedule.ujian.soals;
     const gradedAnswers = answers.map(ans => {
       const question = questions.find(q => q.id === ans.soalId);
       if (!question) return ans;
@@ -93,7 +93,7 @@ class ExamSessionService {
     await this.hasilUjianRepository.update(session.id, updateData);
 
     if (now > schedule.deadline) {
-      throw new Error('Submitted after deadline. Score saved but marked.');
+      throw new Error('Jawaban dikumpulkan setelah batas waktu. Skor disimpan namun ditandai.');
     }
 
     return {

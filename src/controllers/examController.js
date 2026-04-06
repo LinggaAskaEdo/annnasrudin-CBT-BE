@@ -5,27 +5,27 @@ class ExamController {
     this.examService = examService;
   }
 
-  createExamPackage = async (req, res, next) => {
-    const { title, mapelId } = req.body;
+  createUjian = async (req, res, next) => {
+    const { title, mapel } = req.body;
     
     try {
-      const newPackage = await this.examService.createExamPackage(title, mapelId, req.user.id);
-      winston.info(`Exam Package ${newPackage.title} created by Guru ${req.user.username}`);
+      const newUjian = await this.examService.createUjian(title, mapel, req.user);
+      winston.info(`Ujian ${newUjian.title} berhasil dibuat oleh ${req.user.username}`);
       res.status(201).json({
         status: 'success',
-        data: newPackage
+        data: newUjian
       });
     } catch (error) {
       next(error);
     }
   };
 
-  createQuestion = async (req, res, next) => {
+  createSoal = async (req, res, next) => {
     try {
-      const newQuestion = await this.examService.createQuestion(req.body, req.user);
+      const newSoal = await this.examService.createSoal(req.body, req.user);
       res.status(201).json({
         status: 'success',
-        data: newQuestion
+        data: newSoal
       });
     } catch (error) {
       next(error);
@@ -44,55 +44,55 @@ class ExamController {
     }
   };
 
-  getMyPackages = async (req, res, next) => {
+  getUjianSaya = async (req, res, next) => {
     try {
-      const packages = await this.examService.getMyPackages(req.user.id);
-      res.json({ status: 'success', data: packages });
+      const ujians = await this.examService.getUjianSaya(req.user.id);
+      res.json({ status: 'success', data: ujians });
     } catch (error) {
       next(error);
     }
   };
 
-  updateExamPackage = async (req, res, next) => {
+  updateUjian = async (req, res, next) => {
     const { id } = req.params;
-    const { title, mapelId } = req.body;
+    const { title, mapel } = req.body;
 
     try {
-      const updated = await this.examService.updateExamPackage(id, title, mapelId, req.user);
+      const updated = await this.examService.updateUjian(id, title, mapel, req.user);
       res.json({ status: 'success', data: updated });
     } catch (error) {
       next(error);
     }
   };
 
-  deleteExamPackage = async (req, res, next) => {
+  deleteUjian = async (req, res, next) => {
     const { id } = req.params;
 
     try {
-      await this.examService.deleteExamPackage(id, req.user);
-      res.json({ status: 'success', message: 'Exam package and its questions deleted successfully' });
+      await this.examService.deleteUjian(id, req.user);
+      res.json({ status: 'success', message: 'Ujian dan soal-soalnya berhasil dihapus' });
     } catch (error) {
       next(error);
     }
   };
 
-  updateQuestion = async (req, res, next) => {
+  updateSoal = async (req, res, next) => {
     const { id } = req.params;
 
     try {
-      const updated = await this.examService.updateQuestion(id, req.body, req.user);
+      const updated = await this.examService.updateSoal(id, req.body, req.user);
       res.json({ status: 'success', data: updated });
     } catch (error) {
       next(error);
     }
   };
 
-  deleteQuestion = async (req, res, next) => {
+  deleteSoal = async (req, res, next) => {
     const { id } = req.params;
 
     try {
-      await this.examService.deleteQuestion(id, req.user);
-      res.json({ status: 'success', message: 'Question deleted successfully' });
+      await this.examService.deleteSoal(id, req.user);
+      res.json({ status: 'success', message: 'Soal berhasil dihapus' });
     } catch (error) {
       next(error);
     }

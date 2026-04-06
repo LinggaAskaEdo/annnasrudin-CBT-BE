@@ -233,7 +233,7 @@ error) secara spesifik untuk Sistem CBT SD.
 ### 3.3 Dashboard Hasil Ujian (Rekap)
 
 - **Method:** `GET`
-- **Endpoint:** `/guru/exam-results`
+- **Endpoint:** `/guru/hasil-ujian`
 - **Akses:** GURU
 - **Response Sukses (200 OK):**
 
@@ -243,7 +243,7 @@ error) secara spesifik untuk Sistem CBT SD.
     "data": [
       {
         "scheduleId": "uuid",
-        "examTitle": "UTS IPA",
+        "judulUjian": "UTS IPA",
         "rombel": "Kelas 6A",
         "completedCount": 25,
         "needsGradingCount": 5
@@ -255,7 +255,7 @@ error) secara spesifik untuk Sistem CBT SD.
 ### 3.4 Detail Pengerjaan Siswa (Untuk Grading)
 
 - **Method:** `GET`
-- **Endpoint:** `/guru/submissions/:hasilUjianId`
+- **Endpoint:** `/guru/pengumpulan/:hasilUjianId`
 - **Akses:** GURU
 - **Path Params:** `hasilUjianId` (UUID)
 - **Response Sukses (200 OK):**
@@ -288,7 +288,7 @@ error) secara spesifik untuk Sistem CBT SD.
 ### 3.5 Memberikan Nilai Manual (Grading)
 
 - **Method:** `PATCH`
-- **Endpoint:** `/guru/submissions/:hasilUjianId/grade`
+- **Endpoint:** `/guru/pengumpulan/:hasilUjianId/grade`
 - **Akses:** GURU
 - **Path Params:** `hasilUjianId` (UUID)
 - **Request Body (JSON):**
@@ -380,45 +380,45 @@ error) secara spesifik untuk Sistem CBT SD.
 
 ---
 
-## 5. MANAJEMEN UJIAN (Exams)
+## 5. MANAJEMEN UJIAN (Ujian)
 
-### 5.1 Buat Paket Ujian
+### 5.1 Buat Ujian
 
 - **Method:** `POST`
-- **Endpoint:** `/exams/packages`
-- **Akses:** GURU
+- **Endpoint:** `/ujian`
+- **Akses:** GURU, ADMIN
 - **Request Body (JSON):**
 
   ```json
-  { "title": "UTS IPA", "mapelId": "uuid-mapel" }
+  { "title": "UTS IPA", "mapel": "IPA" }
   ```
 
 - **Response Sukses (201 Created):**
 
   ```json
-  { "status": "success", "data": { "id": "uuid", "title": "UTS IPA" } }
+  { "status": "success", "data": { "id": "uuid", "title": "UTS IPA", "mapel": "IPA", "createdById": "uuid" } }
   ```
 
-### 5.2 Lihat Daftar Paket Ujian
+### 5.2 Daftar Ujian Saya
 
 - **Method:** `GET`
-- **Endpoint:** `/exams/my-packages`
+- **Endpoint:** `/ujian`
 - **Akses:** GURU
 - **Response Sukses (200 OK):**
 
   ```json
-  { "status": "success", "data": [ { "id": "uuid", "title": "UTS IPA" } ] }
+  { "status": "success", "data": [ { "id": "uuid", "title": "UTS IPA", "mapel": "IPA" } ] }
   ```
 
-### 5.3 Edit Paket Ujian
+### 5.3 Edit Ujian
 
 - **Method:** `PUT`
-- **Endpoint:** `/exams/packages/:id`
+- **Endpoint:** `/ujian/:id`
 - **Akses:** GURU
 - **Request Body (JSON):**
 
   ```json
-  { "title": "UTS IPA (Revisi)", "mapelId": "uuid-mapel" }
+  { "title": "UTS IPA (Revisi)", "mapel": "IPA" }
   ```
 
 - **Response Sukses (200 OK):**
@@ -427,25 +427,25 @@ error) secara spesifik untuk Sistem CBT SD.
   { "status": "success", "data": { "id": "uuid", "title": "UTS IPA (Revisi)" } }
   ```
 
-### 5.4 Hapus Paket Ujian
+### 5.4 Hapus Ujian
 
 - **Method:** `DELETE`
-- **Endpoint:** `/exams/packages/:id`
+- **Endpoint:** `/ujian/:id`
 - **Akses:** GURU
 - **Response Sukses (200 OK):**
 
   ```json
-  { "status": "success", "message": "Exam package deleted" }
+  { "status": "success", "message": "Ujian dan soal-soalnya berhasil dihapus" }
   ```
 
 ---
 
-## 6. MANAJEMEN SOAL (Questions)
+## 6. MANAJEMEN SOAL (Soal)
 
 ### 6.1 Tambah Soal
 
 - **Method:** `POST`
-- **Endpoint:** `/exams/questions`
+- **Endpoint:** `/ujian/soal`
 - **Akses:** GURU
 - **Request Body (JSON):**
 
@@ -453,7 +453,7 @@ error) secara spesifik untuk Sistem CBT SD.
 
   ```json
   {
-    "paketUjianId": "uuid",
+    "ujianId": "uuid",
     "questionType": "PILGAN",
     "questionText": "Ibukota Indonesia adalah?",
     "options": ["Jakarta", "Bandung", "Medan", "Surabaya"],
@@ -465,7 +465,7 @@ error) secara spesifik untuk Sistem CBT SD.
 
   ```json
   {
-    "paketUjianId": "uuid",
+    "ujianId": "uuid",
     "questionType": "URAIAN",
     "questionText": "Jelaskan proses fotosintesis!"
   }
@@ -477,22 +477,22 @@ error) secara spesifik untuk Sistem CBT SD.
   { "status": "success", "data": { "id": "uuid", "questionText": "...", "type": "PILGAN" } }
   ```
 
-### 6.2 Lihat Bank Soal
+### 6.2 Lihat Bank Soal (Koleksi Soal)
 
 - **Method:** `GET`
-- **Endpoint:** `/exams/bank-soal`
+- **Endpoint:** `/ujian/soal/bank`
 - **Akses:** GURU
-- **Query Params:** `?paketUjianId=uuid`
+- **Query Params:** `?mapel=IPA&search=fotosintesis`
 - **Response Sukses (200 OK):**
 
   ```json
-  { "status": "success", "data": [ { "id": "uuid", "questionText": "..." } ] }
+  { "status": "success", "data": [ { "id": "uuid", "questionText": "...", "ujian": { "mapel": "IPA" } } ] }
   ```
 
 ### 6.3 Update Soal
 
 - **Method:** `PUT`
-- **Endpoint:** `/exams/questions/:id`
+- **Endpoint:** `/ujian/soal/:id`
 - **Akses:** GURU
 - **Request Body (JSON):** (Sama seperti Tambah Soal)
 - **Response Sukses (200 OK):**
@@ -504,12 +504,12 @@ error) secara spesifik untuk Sistem CBT SD.
 ### 6.4 Hapus Soal
 
 - **Method:** `DELETE`
-- **Endpoint:** `/exams/questions/:id`
+- **Endpoint:** `/ujian/soal/:id`
 - **Akses:** GURU
 - **Response Sukses (200 OK):**
 
   ```json
-  { "status": "success", "message": "Question deleted" }
+  { "status": "success", "message": "Soal berhasil dihapus" }
   ```
 
 ---
@@ -519,16 +519,17 @@ error) secara spesifik untuk Sistem CBT SD.
 ### 7.1 Buat Jadwal Ujian
 
 - **Method:** `POST`
-- **Endpoint:** `/exams/schedule`
+- **Endpoint:** `/ujian/schedule`
 - **Akses:** GURU
 - **Request Body (JSON):**
 
   ```json
   {
-    "paketUjianId": "uuid-paket",
+    "ujianId": "uuid-ujian",
     "rombelId": "uuid-rombel",
     "startTime": "2026-04-03T08:00:00.000Z",
-    "endTime": "2026-04-03T10:00:00.000Z"
+    "endTime": "2026-04-03T10:00:00.000Z",
+    "deadline": "2026-04-03T10:30:00.000Z"
   }
   ```
 
@@ -538,21 +539,21 @@ error) secara spesifik untuk Sistem CBT SD.
   { "status": "success", "data": { "id": "uuid", "startTime": "..." } }
   ```
 
-### 7.2 Lihat Daftar Jadwal
+### 7.2 Lihat Daftar Jadwal Saya
 
 - **Method:** `GET`
-- **Endpoint:** `/exams/my-schedules`
+- **Endpoint:** `/ujian/schedule`
 - **Akses:** GURU
 - **Response Sukses (200 OK):**
 
   ```json
-  { "status": "success", "data": [ { "id": "uuid", "paketUjian": "UTS", "rombel": "6A" } ] }
+  { "status": "success", "data": [ { "id": "uuid", "ujian": { "title": "UTS" }, "rombel": { "name": "6A" } } ] }
   ```
 
 ### 7.3 Update Jadwal
 
 - **Method:** `PUT`
-- **Endpoint:** `/exams/schedule/:id`
+- **Endpoint:** `/ujian/schedule/:id`
 - **Akses:** GURU
 - **Request Body (JSON):**
 
@@ -572,7 +573,7 @@ error) secara spesifik untuk Sistem CBT SD.
 ### 7.4 Hapus Jadwal
 
 - **Method:** `DELETE`
-- **Endpoint:** `/exams/schedule/:id`
+- **Endpoint:** `/ujian/schedule/:id`
 - **Akses:** GURU
 - **Response Sukses (200 OK):**
 
@@ -612,10 +613,10 @@ error) secara spesifik untuk Sistem CBT SD.
   { "status": "success", "data": [ { "id": "uuid", "title": "Modul IPA", "pdfPath": "..." } ] }
   ```
 
-### 8.3 Ambil Daftar Ujian (Jadwal)
+### 8.3 Ambil Daftar Ujian (Jadwal Tersedia)
 
 - **Method:** `GET`
-- **Endpoint:** `/siswa/exams`
+- **Endpoint:** `/siswa/ujian`
 - **Akses:** SISWA
 - **Response Sukses (200 OK):**
 
@@ -626,8 +627,11 @@ error) secara spesifik untuk Sistem CBT SD.
       {
         "id": "uuid-schedule",
         "title": "UTS IPA",
+        "subject": "IPA",
         "startTime": "...",
-        "endTime": "..."
+        "endTime": "...",
+        "deadline": "...",
+        "status": "AVAILABLE" // atau UPCOMING, EXPIRED, COMPLETED
       }
     ]
   }
@@ -636,7 +640,7 @@ error) secara spesifik untuk Sistem CBT SD.
 ### 8.4 Mulai Ujian
 
 - **Method:** `POST`
-- **Endpoint:** `/siswa/exams/:scheduleId/start`
+- **Endpoint:** `/siswa/ujian/:scheduleId/start`
 - **Akses:** SISWA
 - **Path Params:** `scheduleId` (UUID)
 - **Response Sukses (200 OK):**
@@ -646,7 +650,7 @@ error) secara spesifik untuk Sistem CBT SD.
     "status": "success",
     "data": {
       "session": { "id": "uuid", "status": "ONGOING", "startTime": "..." },
-      "questions": [
+      "soal": [
         {
           "id": "uuid-soal-1",
           "questionText": "Ibukota Indonesia adalah?",
@@ -668,14 +672,14 @@ error) secara spesifik untuk Sistem CBT SD.
   ```json
   {
     "status": "error",
-    "message": "Exam not available at this time or already submitted"
+    "message": "Ujian belum atau sudah tidak tersedia"
   }
   ```
 
 ### 8.5 Kumpulkan Jawaban Ujian
 
 - **Method:** `POST`
-- **Endpoint:** `/siswa/exams/:scheduleId/submit`
+- **Endpoint:** `/siswa/ujian/:scheduleId/submit`
 - **Akses:** SISWA
 - **Path Params:** `scheduleId` (UUID)
 - **Request Body (JSON):**
@@ -694,8 +698,8 @@ error) secara spesifik untuk Sistem CBT SD.
   ```json
   {
     "status": "success",
-    "message": "Exam submitted successfully",
-    "score": 80 // (Bisa null jika masih butuh grading uraian)
+    "message": "Ujian berhasil dikumpulkan",
+    "scorePilgan": 80
   }
   ```
 
@@ -709,7 +713,7 @@ error) secara spesifik untuk Sistem CBT SD.
   ```json
   {
     "status": "success",
-    "data": [ { "id": "uuid", "examTitle": "UTS IPA", "score": 85, "submittedAt": "..." } ]
+    "data": [ { "id": "uuid", "judulUjian": "UTS IPA", "score": 85, "submittedAt": "..." } ]
   }
   ```
 
@@ -741,7 +745,7 @@ error) secara spesifik untuk Sistem CBT SD.
 ### 9.1 Laporan Nilai Kelas
 
 - **Method:** `GET`
-- **Endpoint:** `/reports/exams/:scheduleId`
+- **Endpoint:** `/reports/ujian/:scheduleId`
 - **Akses:** ADMIN, GURU
 - **Path Params:** `scheduleId` (UUID)
 - **Response Sukses (200 OK):**

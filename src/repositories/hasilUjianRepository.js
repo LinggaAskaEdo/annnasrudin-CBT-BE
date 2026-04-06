@@ -19,7 +19,7 @@ class HasilUjianRepository {
       include: {
         jadwalUjian: {
           include: {
-            paketUjian: {
+            ujian: {
               include: {
                 soals: true
               }
@@ -37,9 +37,8 @@ class HasilUjianRepository {
         siswa: true,
         jadwalUjian: {
           include: {
-            paketUjian: {
+            ujian: {
               include: {
-                mapel: true,
                 soals: true
               }
             }
@@ -62,7 +61,7 @@ class HasilUjianRepository {
         },
         jadwalUjian: {
           include: {
-            paketUjian: { select: { title: true, mapel: { select: { name: true } } } }
+            ujian: { select: { title: true, mapel: true } }
           }
         }
       },

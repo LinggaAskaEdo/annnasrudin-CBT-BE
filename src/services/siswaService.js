@@ -43,8 +43,8 @@ class SiswaService {
 
       return {
         id: s.id,
-        title: s.paketUjian.title,
-        subject: s.paketUjian.mapel.name,
+        title: s.ujian.title,
+        subject: s.ujian.mapel,
         startTime: s.startTime,
         endTime: s.endTime,
         deadline: s.deadline,
