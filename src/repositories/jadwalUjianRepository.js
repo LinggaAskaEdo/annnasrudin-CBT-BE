@@ -7,9 +7,8 @@ class JadwalUjianRepository {
     return await this.prisma.jadwalUjian.findMany({
       where: filters,
       include: {
-        paketUjian: {
+        ujian: {
           include: {
-            mapel: true,
             soals: true
           }
         },
@@ -23,9 +22,8 @@ class JadwalUjianRepository {
     return await this.prisma.jadwalUjian.findUnique({
       where: { id },
       include: {
-        paketUjian: {
+        ujian: {
           include: {
-            mapel: true,
             soals: true
           }
         },

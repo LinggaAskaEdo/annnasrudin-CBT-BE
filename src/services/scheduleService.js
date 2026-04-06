@@ -1,13 +1,13 @@
 class ScheduleService {
-  constructor(jadwalUjianRepository, paketUjianRepository) {
+  constructor(jadwalUjianRepository, ujianRepository) {
     this.jadwalUjianRepository = jadwalUjianRepository;
-    this.paketUjianRepository = paketUjianRepository;
+    this.ujianRepository = ujianRepository;
   }
 
   createSchedule = async (scheduleData, currentUser) => {
-    const { paketUjianId } = scheduleData;
-    const paketUjian = await this.paketUjianRepository.findById(paketUjianId);
-    if (!paketUjian || paketUjian.guruId !== currentUser.id) {
+    const { ujianId } = scheduleData;
+    const ujian = await this.ujianRepository.findById(ujianId);
+    if (!ujian || (ujian.createdById !== currentUser.id && currentUser.role !== 'ADMIN')) {
       throw new Error('Forbidden');
     }
 
@@ -20,12 +20,12 @@ class ScheduleService {
   };
 
   getMySchedules = async (currentUser) => {
-    return await this.jadwalUjianRepository.findAll({ paketUjian: { guruId: currentUser.id } });
+    return await this.jadwalUjianRepository.findAll({ ujian: { createdById: currentUser.id } });
   };
 
   updateSchedule = async (id, scheduleData, currentUser) => {
     const existing = await this.jadwalUjianRepository.findById(id);
-    if (!existing || existing.paketUjian.guruId !== currentUser.id) {
+    if (!existing || (existing.ujian.createdById !== currentUser.id && currentUser.role !== 'ADMIN')) {
       throw new Error('Forbidden');
     }
 
@@ -41,7 +41,7 @@ class ScheduleService {
 
   deleteSchedule = async (id, currentUser) => {
     const existing = await this.jadwalUjianRepository.findById(id);
-    if (!existing || existing.paketUjian.guruId !== currentUser.id) {
+    if (!existing || (existing.ujian.createdById !== currentUser.id && currentUser.role !== 'ADMIN')) {
       throw new Error('Forbidden');
     }
 

@@ -12,7 +12,7 @@ class SoalRepository {
   findById = async (id) => {
     return await this.prisma.soal.findUnique({
       where: { id },
-      include: { paketUjian: true }
+      include: { ujian: true }
     });
   };
 
@@ -20,10 +20,9 @@ class SoalRepository {
     return await this.prisma.soal.findMany({
       where: filters,
       include: {
-        paketUjian: {
+        ujian: {
           include: {
-            guru: { select: { name: true } },
-            mapel: { select: { name: true } }
+            createdBy: { select: { name: true } }
           }
         }
       }

@@ -1,21 +1,26 @@
 class ExamService {
-  constructor(paketUjianRepository, soalRepository) {
-    this.paketUjianRepository = paketUjianRepository;
+  constructor(ujianRepository, soalRepository) {
+    this.ujianRepository = ujianRepository;
     this.soalRepository = soalRepository;
   }
 
-  createExamPackage = async (title, mapelId, guruId) => {
-    return await this.paketUjianRepository.create({
+  // Only GURU and ADMIN can create Ujian
+  createUjian = async (title, mapel, currentUser) => {
+    if (currentUser.role !== 'GURU' && currentUser.role !== 'ADMIN') throw new Error('Forbidden');
+
+    return await this.ujianRepository.create({
       title,
-      mapelId,
-      guruId
+      mapel,
+      createdById: currentUser.id
     });
   };
 
-  createQuestion = async (questionData, currentUser) => {
-    const { paketUjianId } = questionData;
-    const paketUjian = await this.paketUjianRepository.findById(paketUjianId);
-    if (!paketUjian || paketUjian.guruId !== currentUser.id) {
+  createSoal = async (questionData, currentUser) => {
+    if (currentUser.role !== 'GURU' && currentUser.role !== 'ADMIN') throw new Error('Forbidden');
+
+    const { ujianId } = questionData;
+    const ujian = await this.ujianRepository.findById(ujianId);
+    if (!ujian || (ujian.createdById !== currentUser.id && currentUser.role !== 'ADMIN')) {
       throw new Error('Forbidden');
     }
 
@@ -23,48 +28,48 @@ class ExamService {
   };
 
   getBankSoal = async (query) => {
-    const { mapelId, search } = query;
+    const { mapel, search } = query;
     const filters = {};
-    if (mapelId) filters.paketUjian = { mapelId };
+    if (mapel) filters.ujian = { mapel: { contains: mapel } };
     if (search) filters.questionText = { contains: search };
 
     return await this.soalRepository.findAll(filters);
   };
 
-  getMyPackages = async (guruId) => {
-    return await this.paketUjianRepository.findAll({ guruId });
+  getUjianSaya = async (userId) => {
+    return await this.ujianRepository.findAll({ createdById: userId });
   };
 
-  updateExamPackage = async (id, title, mapelId, currentUser) => {
-    const existing = await this.paketUjianRepository.findById(id);
-    if (!existing || existing.guruId !== currentUser.id) {
+  updateUjian = async (id, title, mapel, currentUser) => {
+    const existing = await this.ujianRepository.findById(id);
+    if (!existing || (existing.createdById !== currentUser.id && currentUser.role !== 'ADMIN')) {
       throw new Error('Forbidden');
     }
 
-    return await this.paketUjianRepository.update(id, { title, mapelId });
+    return await this.ujianRepository.update(id, { title, mapel });
   };
 
-  deleteExamPackage = async (id, currentUser) => {
-    const existing = await this.paketUjianRepository.findById(id);
-    if (!existing || existing.guruId !== currentUser.id) {
+  deleteUjian = async (id, currentUser) => {
+    const existing = await this.ujianRepository.findById(id);
+    if (!existing || (existing.createdById !== currentUser.id && currentUser.role !== 'ADMIN')) {
       throw new Error('Forbidden');
     }
 
-    return await this.paketUjianRepository.deletePackage(id);
+    return await this.ujianRepository.deleteUjian(id);
   };
 
-  updateQuestion = async (id, questionData, currentUser) => {
+  updateSoal = async (id, questionData, currentUser) => {
     const existing = await this.soalRepository.findById(id);
-    if (!existing || existing.paketUjian.guruId !== currentUser.id) {
+    if (!existing || (existing.ujian.createdById !== currentUser.id && currentUser.role !== 'ADMIN')) {
       throw new Error('Forbidden');
     }
 
     return await this.soalRepository.update(id, questionData);
   };
 
-  deleteQuestion = async (id, currentUser) => {
+  deleteSoal = async (id, currentUser) => {
     const existing = await this.soalRepository.findById(id);
-    if (!existing || existing.paketUjian.guruId !== currentUser.id) {
+    if (!existing || (existing.ujian.createdById !== currentUser.id && currentUser.role !== 'ADMIN')) {
       throw new Error('Forbidden');
     }
 
