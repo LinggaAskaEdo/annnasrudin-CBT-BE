@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 const mPrisma = {
-    paketUjian: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), delete: jest.fn(), findMany: jest.fn() },
+    ujian: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), delete: jest.fn(), findMany: jest.fn() },
     soal: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), delete: jest.fn(), findMany: jest.fn() },
     jadwalUjian: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn(), delete: jest.fn(), findMany: jest.fn() },
     user: { findUnique: jest.fn() }
@@ -35,22 +35,22 @@ describe('Exam Management Unit Tests', () => {
         });
     });
 
-    describe('Exam Packages', () => {
-        test('POST /api/exams/packages should create a package', async () => {
-            mPrisma.paketUjian.create.mockResolvedValue({ id: 'p1', title: 'UTS Math' });
+    describe('Ujian', () => {
+        test('POST /api/ujian should create an exam', async () => {
+            mPrisma.ujian.create.mockResolvedValue({ id: 'p1', title: 'UTS Math' });
             const res = await request(app)
-                .post('/api/exams/packages')
+                .post('/api/ujian')
                 .set('Authorization', `Bearer ${mockToken}`)
-                .send({ title: 'UTS Math', mapelId: 'm1' });
+                .send({ title: 'UTS Math', mapel: 'Matematika' });
 
             expect(res.statusCode).toBe(201);
             expect(res.body.data.title).toBe('UTS Math');
         });
 
-        test('GET /api/exams/my-packages should return packages', async () => {
-            mPrisma.paketUjian.findMany.mockResolvedValue([{ id: 'p1' }]);
+        test('GET /api/ujian should return exams', async () => {
+            mPrisma.ujian.findMany.mockResolvedValue([{ id: 'p1' }]);
             const res = await request(app)
-                .get('/api/exams/my-packages')
+                .get('/api/ujian')
                 .set('Authorization', `Bearer ${mockToken}`);
 
             expect(res.statusCode).toBe(200);
@@ -58,29 +58,29 @@ describe('Exam Management Unit Tests', () => {
         });
     });
 
-    describe('Questions', () => {
-        test('POST /api/exams/questions should add a question', async () => {
-            mPrisma.paketUjian.findUnique.mockResolvedValue({ id: 'p1', guruId: 'guru-1' });
+    describe('Soal', () => {
+        test('POST /api/ujian/soal should add a question', async () => {
+            mPrisma.ujian.findUnique.mockResolvedValue({ id: 'p1', createdById: 'guru-1' });
             mPrisma.soal.create.mockResolvedValue({ id: 'q1', type: 'PILGAN' });
 
             const res = await request(app)
-                .post('/api/exams/questions')
+                .post('/api/ujian/soal')
                 .set('Authorization', `Bearer ${mockToken}`)
-                .send({ paketUjianId: 'p1', type: 'PILGAN', questionText: '1+1?' });
+                .send({ ujianId: 'p1', type: 'PILGAN', questionText: '1+1?' });
 
             expect(res.statusCode).toBe(201);
         });
     });
 
     describe('Scheduling', () => {
-        test('POST /api/exams/schedule should schedule an exam', async () => {
-            mPrisma.paketUjian.findUnique.mockResolvedValue({ id: 'p1', guruId: 'guru-1' });
-            mPrisma.jadwalUjian.create.mockResolvedValue({ id: 's1', paketUjianId: 'p1' });
+        test('POST /api/ujian/schedule should schedule an exam', async () => {
+            mPrisma.ujian.findUnique.mockResolvedValue({ id: 'p1', createdById: 'guru-1' });
+            mPrisma.jadwalUjian.create.mockResolvedValue({ id: 's1', ujianId: 'p1' });
 
             const res = await request(app)
-                .post('/api/exams/schedule')
+                .post('/api/ujian/schedule')
                 .set('Authorization', `Bearer ${mockToken}`)
-                .send({ paketUjianId: 'p1', rombelId: 'r1', startAt: new Date(), endAt: new Date() });
+                .send({ ujianId: 'p1', rombelId: 'r1', startAt: new Date(), endAt: new Date() });
 
             expect(res.statusCode).toBe(201);
         });

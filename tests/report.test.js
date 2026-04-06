@@ -34,7 +34,7 @@ describe('Report Features Unit Tests', () => {
         });
         mPrisma.jadwalUjian.findUnique.mockResolvedValue({ 
             id: 's1', 
-            paketUjian: { title: 'Exam', mapel: { name: 'Subject' } },
+            ujian: { title: 'Exam', mapel: 'Subject' },
             rombel: { name: 'Kelas 6A' },
             hasilUjians: [
                 { id: 'h1', siswa: { name: 'Siswa1', username: 's1' }, scorePilgan: 50, scoreUraian: 30, status: 'COMPLETED', updatedAt: new Date() }
@@ -42,13 +42,13 @@ describe('Report Features Unit Tests', () => {
         });
     });
 
-    test('GET /api/reports/exams/:scheduleId should return composite report', async () => {
+    test('GET /api/reports/ujian/:scheduleId should return composite report', async () => {
         mPrisma.hasilUjian.findMany.mockResolvedValue([
             { id: 'h1', siswa: { name: 'Siswa1' }, scorePilgan: 50, scoreUraian: 30 }
         ]);
 
         const res = await request(app)
-            .get('/api/reports/exams/s1')
+            .get('/api/reports/ujian/s1')
             .set('Authorization', `Bearer ${mockToken}`);
 
         expect(res.statusCode).toBe(200);

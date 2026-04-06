@@ -75,18 +75,18 @@ describe('Guru Features Unit Tests', () => {
     });
 
     describe('Manual Grading', () => {
-        test('GET /api/guru/submissions/:id should return submission detail', async () => {
+        test('GET /api/guru/pengumpulan/:id should return submission detail', async () => {
             mPrisma.hasilUjian.findUnique.mockResolvedValue({ id: 'h1', answers: [] });
 
             const res = await request(app)
-                .get('/api/guru/submissions/h1')
+                .get('/api/guru/pengumpulan/h1')
                 .set('Authorization', `Bearer ${mockToken}`);
 
             expect(res.statusCode).toBe(200);
             expect(res.body.data.id).toBe('h1');
         });
 
-        test('PATCH /api/guru/submissions/:id/grade should update grades', async () => {
+        test('PATCH /api/guru/pengumpulan/:id/grade should update grades', async () => {
             mPrisma.hasilUjian.findUnique.mockResolvedValue({ 
                 id: 'h1', 
                 answers: [{ soalId: 'q1', type: 'URAIAN', text: 'ans' }] 
@@ -94,7 +94,7 @@ describe('Guru Features Unit Tests', () => {
             mPrisma.hasilUjian.update.mockResolvedValue({ id: 'h1', scoreUraian: 10 });
 
             const res = await request(app)
-                .patch('/api/guru/submissions/h1/grade')
+                .patch('/api/guru/pengumpulan/h1/grade')
                 .set('Authorization', `Bearer ${mockToken}`)
                 .send({ uraianGrades: [{ soalId: 'q1', guruScore: 10, feedback: 'Bagus' }] });
 

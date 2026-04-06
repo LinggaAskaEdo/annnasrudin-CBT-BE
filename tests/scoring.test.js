@@ -60,9 +60,9 @@ describe('Scoring Logic Unit Tests', () => {
       mPrisma.jadwalUjian.findUnique.mockResolvedValue({
         id: 'schedule-1',
         deadline: new Date(Date.now() + 100000),
-        paketUjian: {
+        ujian: {
           title: 'Ujian IPA',
-          mapel: { name: 'IPA' },
+          mapel: 'IPA',
           soals: [
             { id: '1', questionType: 'PILGAN', correctAnswer: 'A' },
             { id: '2', questionType: 'PILGAN', correctAnswer: 'B' },
@@ -84,7 +84,7 @@ describe('Scoring Logic Unit Tests', () => {
       ];
 
       const res = await request(app)
-        .post('/api/siswa/exams/schedule-1/submit')
+        .post('/api/siswa/ujian/schedule-1/submit')
         .set('Authorization', `Bearer ${mockToken}`)
         .send({ answers: responses });
 
@@ -119,9 +119,9 @@ describe('Scoring Logic Unit Tests', () => {
       // Mock schedule for re-calculation
       mPrisma.jadwalUjian.findUnique.mockResolvedValue({
         id: 'schedule-1',
-        paketUjian: {
+        ujian: {
           title: 'Ujian IPA',
-          mapel: { name: 'IPA' },
+          mapel: 'IPA',
           soals: [
             { id: '1', questionType: 'PILGAN', correctAnswer: 'A' },
             { id: '3', questionType: 'URAIAN' }
@@ -138,7 +138,7 @@ describe('Scoring Logic Unit Tests', () => {
             { soalId: '3', answer: 'Jawaban panjang', type: 'URAIAN' }
         ],
         siswa: { name: 'Test Siswa', rombel: { name: 'Class A' } },
-        jadwalUjian: { paketUjian: { title: 'Ujian IPA' } }
+        jadwalUjian: { ujian: { title: 'Ujian IPA' } }
       });
 
       // Mock update to return the updated record
@@ -157,7 +157,7 @@ describe('Scoring Logic Unit Tests', () => {
       });
 
       const res = await request(app)
-        .patch('/api/guru/submissions/hasil-1/grade')
+        .patch('/api/guru/pengumpulan/hasil-1/grade')
         .set('Authorization', `Bearer ${mockToken}`)
         .send({ uraianGrades });
 
